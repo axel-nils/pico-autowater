@@ -36,12 +36,14 @@ def get_moisture():
 
 def tick(timer):
     m = get_moisture()
-    ledred.value(m < 850)
+    ledred.value(m < 925)
+    c_m = int((m - 300) / 7)
     
     t = get_temp()
     ledgreen.value(t > 28)
+    c_t = int(t - 5)
     
-    print(f"Moisture: {m}, Temp: {t}")
+    print(f"Fuktighet: {c_m}%, Temp {c_t} C")
 
 
 # Setup
@@ -68,3 +70,4 @@ if devices:
 # Main loop
 while True:
     pass
+
