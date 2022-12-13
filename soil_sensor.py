@@ -1,11 +1,11 @@
-""" Module for reading sensor data from Adafruit STEMMA Soil Sensor """
+"""Module for reading sensor data from Adafruit STEMMA Soil Sensor"""
 
-from machine import I2C, Pin
-import struct
 from time import sleep
+import struct
+from machine import I2C, Pin
 
 class SoilSensor:
-
+    """Contains temp and moisure values pulled from sensor using I2C"""
 
     MS_ADDR = 0x36
     MS_TEMP_BASE = 0x00
@@ -23,8 +23,8 @@ class SoilSensor:
         if debug:
             devices = self.i2c.scan()
             if devices:
-                for d in devices:
-                    print(hex(d))
+                for device in devices:
+                    print(hex(device))
 
 
     def read_sensor(self, base, offset: int, nbytes: int) -> bytearray:
@@ -36,25 +36,26 @@ class SoilSensor:
         buf = self.i2c.readfrom_mem(self.MS_ADDR, offset, nbytes)
         return buf
 
-    
+
     def update_temp(self) -> int:
         """Updates and returns the measured temperature"""
         buf = bytearray(self.read_sensor(self.MS_TEMP_BASE, self.MS_TEMP_OFFSET, 4))
         buf[0] = buf[0] & 0x3F
-        t = 0.00001525878 * struct.unpack(">I", buf)[0]
-        self.temp = t
-        return t
+        temp = 0.00001525878 * struct.unpack(">I", buf)[0]
+        self.temp = temp
+        return temp
 
 
     def update_moisture(self) -> int:
         """Updates and returns the measured moisture"""
         buf = self.read_sensor(self.MS_TOUCH_BASE, self.MS_TOUCH_OFFSET, 2)
-        m = struct.unpack(">H", buf)[0]
-        self.moisture = m
-        return m
+        moisture = struct.unpack(">H", buf)[0]
+        self.moisture = moisture
+        return moisture
 
 
     def update(self):
+        """Retrieves new values for both temp and moisture"""
         self.update_temp()
         self.update_moisture()
 
