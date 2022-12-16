@@ -1,9 +1,13 @@
-"""Module for keeping track of time after losing power and internet using local file"""
+"""
+Module containing classes for keeping track of time after losing power using local file
+"""
 
 from machine import RTC
 
 class BackupTime:
-    """Contains time value that is kept current by, when needed, restoring backup saved in file"""
+    """
+    Contains time value that is kept current by, when needed, restoring backup saved in file
+    """
 
     def __init__(self, time_file: str):
         self.rtc = RTC()
@@ -14,27 +18,35 @@ class BackupTime:
 
 
     def get_times(self):
-        """Updates class member values time and saved_time"""
+        """
+        Updates class member values time and saved_time
+        """
         self.time = self.rtc.datetime()
         self.saved_time = self.read_saved_time()
 
 
     def read_saved_time(self):
-        """Returns value of time tuple saved in backup file"""
+        """
+        Returns value of time tuple saved in backup file
+        """
         with open(self.time_file, "r", encoding="utf-8") as file:
             time = file.readline()
         return tuple(time)
 
 
     def save_time(self):
-        """Writes current value of time to backup file"""
+        """
+        Writes current value of time to backup file
+        """
         with open(self.time_file, "w", encoding="utf-8") as file:
             file.write(str(self.time))
         self.saved_time = self.read_saved_time()
 
 
     def update(self):
-        """Updates all time values, including RTC datetime, to most accurate"""
+        """
+        Updates all time values, including RTC datetime, to most accurate
+        """
         self.get_times()
         if self.behind():
             self.rtc.datetime(self.saved_time)
@@ -44,14 +56,18 @@ class BackupTime:
 
 
     def behind(self) -> bool:
-        """Compares time tuples, returns true if current time is behind saved time"""
+        """
+        Compares time tuples, returns true if current time is behind saved time
+        """
         current: tuple = self.time
         saved: tuple = self.saved_time
         return self.list_behind(current, saved)
 
 
     def list_behind(self, current: tuple, saved: tuple) -> bool:
-        """Compares values in a tuple one by one"""
+        """
+        Compares values in a tuple one by one
+        """
         if len(current) == 0:
             return False
         if current[0] < saved[0]:
@@ -65,3 +81,7 @@ class BackupTime:
         date = str(self.time[0:3]).replace(",","/").replace(" ", "")
         time = str(self.time[4:7]).replace(",",":").replace(" ", "")
         return f"{date} {time}"
+
+
+    def __repr__(self):
+        return f"BackupTime({self.time_file})"

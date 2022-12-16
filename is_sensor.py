@@ -1,12 +1,16 @@
-"""Module for reading sensor data from Adafruit STEMMA Soil Sensor"""
+"""
+Module containing class for reading sensor data from Adafruit STEMMA Soil Sensor
+"""
 
 from time import sleep
 import struct
 from machine import I2C, Pin
 
 class SoilSensor:
-    """Contains temp and moisure values pulled from sensor using I2C"""
-
+    """
+    Contains temp and moisure values pulled from sensor using I2C
+    """
+    
     MS_ADDR = 0x36
     MS_TEMP_BASE = 0x00
     MS_TEMP_OFFSET = 0x04
@@ -14,8 +18,10 @@ class SoilSensor:
     MS_TOUCH_OFFSET = 0x10
 
 
-    def __init__(self, scl_pin: Pin, sda_pin: Pin, debug: bool=False):
-        """Uses machine.Pin parameters to initialize I2C communication with sensor unit"""
+    def __init__(self, scl_pin: Pin, sda_pin: Pin, debug: bool = False):
+        """
+        Uses machine.Pin parameters to initialize I2C communication with sensor unit
+        """
         self.i2c: I2C = I2C(0, scl=scl_pin, sda=sda_pin)
         self.temp: int = self.update_moisture()
         self.moisture: int = self.update_moisture()
@@ -28,7 +34,9 @@ class SoilSensor:
 
 
     def read_sensor(self, base, offset: int, nbytes: int) -> bytearray:
-        """Helper method for reading data from adress in sensor memory"""
+        """
+        Helper method for reading data from adress in sensor memory
+        """
         temp = bytearray([base, offset])
         self.i2c.writeto(self.MS_ADDR, temp)
         sleep(0.005)
@@ -38,7 +46,9 @@ class SoilSensor:
 
 
     def update_temp(self) -> int:
-        """Updates and returns the measured temperature"""
+        """
+        Updates and returns the measured temperature
+        """
         buf = bytearray(self.read_sensor(self.MS_TEMP_BASE, self.MS_TEMP_OFFSET, 4))
         buf[0] = buf[0] & 0x3F
         temp = 0.00001525878 * struct.unpack(">I", buf)[0]
@@ -47,7 +57,9 @@ class SoilSensor:
 
 
     def update_moisture(self) -> int:
-        """Updates and returns the measured moisture"""
+        """
+        Updates and returns the measured moisture
+        """
         buf = self.read_sensor(self.MS_TOUCH_BASE, self.MS_TOUCH_OFFSET, 2)
         moisture = struct.unpack(">H", buf)[0]
         self.moisture = moisture
@@ -55,9 +67,18 @@ class SoilSensor:
 
 
     def update(self):
-        """Retrieves new values for both temp and moisture"""
+        """'
+        Retrieves new values for both temp and moisture
+        """
         self.update_temp()
         self.update_moisture()
+
+
+    def values(self) -> dict:
+        """
+        Returns dict with sensor values
+        """
+        return {"moisture": self.moisture, "temp": self.temp}
 
 
     def __str__(self):
