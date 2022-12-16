@@ -57,6 +57,7 @@ class DataDict:
 
 
 if __name__ == "__main__":
+    """ # Example usage:
     d = DataDict("data/example_data.json")
     print(d)
     dk = "2022-12-16 10:55:00"
@@ -64,3 +65,4 @@ if __name__ == "__main__":
     d.add(dk, dv)
     print("values added")
     print(d)
+    """

@@ -19,7 +19,7 @@ class BackupTime:
 
     def get_times(self):
         """
-        Updates class member values time and saved_time
+        Updates attributes time and saved_time
         """
         self.time = self.rtc.datetime()
         self.saved_time = self.read_saved_time()
