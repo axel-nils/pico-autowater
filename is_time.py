@@ -2,6 +2,7 @@
 Module containing classes for keeping track of time after losing power using local file
 """
 
+from re import sub
 from machine import RTC
 
 class BackupTime:
@@ -31,7 +32,7 @@ class BackupTime:
         """
         with open(self.time_file, "r", encoding="utf-8") as file:
             time = file.readline()
-        return tuple(time)
+        return eval(time)
 
 
     def save_time(self):
@@ -78,10 +79,15 @@ class BackupTime:
 
 
     def __str__(self):
-        date = str(self.time[0:3]).replace(",","/").replace(" ", "")
-        time = str(self.time[4:7]).replace(",",":").replace(" ", "")
-        return f"{date} {time}"
+        date_string = f"{self.time[0]:04}-{self.time[1]:02}-{self.time[2]:02}"
+        time_string = f"{self.time[4]:02}:{self.time[5]:02}:{self.time[6]:02}"
+        return f"{date_string} {time_string}"
 
 
     def __repr__(self):
-        return f"BackupTime({self.time_file})"
+        return f"BackupTime(\"{self.time_file}\")"
+    
+if __name__ == "__main__":
+    time: BackupTime = BackupTime("data/backup_time.txt")
+    
+    

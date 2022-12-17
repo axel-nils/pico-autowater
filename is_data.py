@@ -4,6 +4,7 @@ Module containing classes for writing and retrieving data
 
 import json
 
+
 class DataDict:
     """
     Python dictionary using json format from local file
@@ -53,16 +54,11 @@ class DataDict:
 
 
     def __str__(self) -> str:
-        return "\n".join([str(value) for value in self.data.values()])
+        return "\n".join([str(item) for item in self.data.items()])
 
 
 if __name__ == "__main__":
-    """ # Example usage:
+     # Example usage:
     d = DataDict("data/example_data.json")
     print(d)
-    dk = "2022-12-16 10:55:00"
-    dv = {"moisture": 250, "temperature": 27}
-    d.add(dk, dv)
-    print("values added")
-    print(d)
-    """
+    

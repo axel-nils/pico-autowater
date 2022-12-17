@@ -9,13 +9,13 @@ from is_data import DataDict
 
 SCL_PIN = Pin(17)
 SDA_PIN = Pin(16)
-LED_GRN = Pin(10, Pin.OUT)
-LED_RED = Pin(11, Pin.OUT)
+LED_GRN = Pin(11, Pin.OUT)
+LED_RED = Pin(10, Pin.OUT)
 
 DATA_FILE = "data/example_data.json"
 TIME_FILE = "data/backup_time.txt"
-DATA_DELAY = 3600 * 1000 # Once per hour
-UPDATE_DELAY = 10 * 1000 # Once every 10 seconds
+DATA_DELAY = 900 * 1000 # Once per hour
+UPDATE_DELAY = 7 * 1000 # Once every 10 seconds
 
 
 def data_tick(timer):
@@ -32,10 +32,9 @@ def update_tick(timer):
     """
     time.update()
     sensor.update()
-    if sensor.moisture < 825:
-        LED_RED.on()
-    if sensor.temp < 27:
-        LED_GRN.on()
+    LED_RED.on() if sensor.moisture < 825 else LED_RED.off()
+    LED_GRN.on() if sensor.temp > 27 else LED_GRN.off()
+        
 
 
 if __name__ == "__main__":
@@ -46,7 +45,3 @@ if __name__ == "__main__":
     tim2 = Timer(period=UPDATE_DELAY, callback=update_tick)
     LED_GRN.off()
     LED_RED.off()
-
-
-    while True:
-        pass
