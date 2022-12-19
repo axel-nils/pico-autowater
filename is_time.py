@@ -5,6 +5,7 @@ Module containing classes for keeping track of time after losing power using loc
 from re import sub
 from machine import RTC
 
+
 class BackupTime:
     """
     Contains time value that is kept current by, when needed, restoring backup saved in file
@@ -17,14 +18,12 @@ class BackupTime:
         self.saved_time = None
         self.update()
 
-
     def get_times(self):
         """
         Updates attributes time and saved_time
         """
         self.time = self.rtc.datetime()
         self.saved_time = self.read_saved_time()
-
 
     def read_saved_time(self):
         """
@@ -34,7 +33,6 @@ class BackupTime:
             time = file.readline()
         return eval(time)
 
-
     def save_time(self):
         """
         Writes current value of time to backup file
@@ -42,7 +40,6 @@ class BackupTime:
         with open(self.time_file, "w", encoding="utf-8") as file:
             file.write(str(self.time))
         self.saved_time = self.read_saved_time()
-
 
     def update(self):
         """
@@ -55,7 +52,6 @@ class BackupTime:
         else:
             self.save_time()
 
-
     def behind(self) -> bool:
         """
         Compares time tuples, returns true if current time is behind saved time
@@ -63,7 +59,6 @@ class BackupTime:
         current: tuple = self.time
         saved: tuple = self.saved_time
         return self.list_behind(current, saved)
-
 
     def list_behind(self, current: tuple, saved: tuple) -> bool:
         """
@@ -77,16 +72,15 @@ class BackupTime:
             return False
         return self.list_behind(current[1:], saved[1:])
 
-
     def __str__(self):
         date_string = f"{self.time[0]:04}-{self.time[1]:02}-{self.time[2]:02}"
         time_string = f"{self.time[4]:02}:{self.time[5]:02}:{self.time[6]:02}"
         return f"{date_string} {time_string}"
 
-
     def __repr__(self):
         return f"BackupTime(\"{self.time_file}\")"
-    
+
+
 if __name__ == "__main__":
     time: BackupTime = BackupTime("data/backup_time.txt")
     

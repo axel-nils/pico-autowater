@@ -6,6 +6,7 @@ from time import sleep
 import struct
 from machine import I2C, Pin
 
+
 class SoilSensor:
     """
     Contains temp and moisure values pulled from sensor using I2C
@@ -17,7 +18,6 @@ class SoilSensor:
     MS_TOUCH_BASE = 0x0F
     MS_TOUCH_OFFSET = 0x10
 
-
     def __init__(self, scl_pin: Pin, sda_pin: Pin, debug: bool = False):
         """
         Uses machine.Pin parameters to initialize I2C communication with sensor unit
@@ -25,13 +25,13 @@ class SoilSensor:
         self.i2c: I2C = I2C(0, scl=scl_pin, sda=sda_pin)
         self.temp: int = self.update_moisture()
         self.moisture: int = self.update_moisture()
+        self.moisture_series: list[int] = [0, 0, 0, 0, 0]
 
         if debug:
             devices = self.i2c.scan()
             if devices:
                 for device in devices:
                     print(hex(device))
-
 
     def read_sensor(self, base, offset: int, nbytes: int) -> bytearray:
         """
@@ -44,7 +44,6 @@ class SoilSensor:
         buf = self.i2c.readfrom_mem(self.MS_ADDR, offset, nbytes)
         return buf
 
-
     def update_temp(self) -> int:
         """
         Updates and returns the measured temperature
@@ -55,7 +54,6 @@ class SoilSensor:
         self.temp = temp
         return temp
 
-
     def update_moisture(self) -> int:
         """
         Updates and returns the measured moisture
@@ -65,6 +63,18 @@ class SoilSensor:
         self.moisture = moisture
         return moisture
 
+    def update_moisture_series(self) -> list[int]:
+        """
+        Updates moisture series
+        """
+        new_series = []
+        for i, m in enumerate(self.moisture_series):
+            if i == 0:
+                continue
+            new_series.append(m)
+        new_series.append(self.moisture)
+        self.moisture_series = new_series
+        return new_series
 
     def update(self):
         """'
@@ -72,14 +82,19 @@ class SoilSensor:
         """
         self.update_temp()
         self.update_moisture()
-
+        self.update_moisture_series()
 
     def values(self) -> dict:
         """
         Returns dict with sensor values
         """
-        return {"moisture": self.moisture, "temp": self.temp}
+        return {"moisture": self.mean_moisture(), "temp": self.temp}
 
+    def mean_moisture(self) -> int:
+        """
+        Returns mean of last 5 moisture readings
+        """
+        return sum(self.moisture_series) // len(self.moisture_series)
 
     def __str__(self):
         return f"Moisture reading: {self.moisture}. Temperature reading: {self.temp} °C."

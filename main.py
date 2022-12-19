@@ -12,9 +12,9 @@ SDA_PIN = Pin(16)
 LED_GRN = Pin(11, Pin.OUT)
 LED_RED = Pin(10, Pin.OUT)
 
-DATA_FILE = "data/example_data.json"
+DATA_FILE = "data/data.json"
 TIME_FILE = "data/backup_time.txt"
-DATA_DELAY = 900 * 1000 # Once per hour
+DATA_DELAY = 3600 * 1000 # Once per hour
 UPDATE_DELAY = 7 * 1000 # Once every 10 seconds
 
 
@@ -32,9 +32,13 @@ def update_tick(timer):
     """
     time.update()
     sensor.update()
-    LED_RED.on() if sensor.moisture < 825 else LED_RED.off()
-    LED_GRN.on() if sensor.temp > 27 else LED_GRN.off()
-        
+    
+    if sensor.mean_moisture() < 825:
+        LED_RED.on()
+    elif sensor.mean_moisture() > 850:
+        LED_RED.off()
+    
+    LED_GRN.on() if sensor.moisture_series[0] == 0 else LED_GRN.off()  
 
 
 if __name__ == "__main__":

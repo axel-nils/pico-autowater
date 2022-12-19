@@ -31,13 +31,11 @@ class DataDict:
             if self.debug:
                 print(f"failed reading data from {self.file_name}")
 
-
     def add(self, key: str, value) -> None:
         """
         Add key-value pair to dictionary
         """
         self.data[key] = value
-
 
     def save(self) -> None:
         """
@@ -52,13 +50,12 @@ class DataDict:
             if self.debug:
                 print(f"failed saving data to {self.file_name}")
 
-
     def __str__(self) -> str:
         return "\n".join([str(item) for item in self.data.items()])
 
 
 if __name__ == "__main__":
-     # Example usage:
+    # Example usage:
     d = DataDict("data/example_data.json")
     print(d)
     
