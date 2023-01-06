@@ -26,5 +26,6 @@ locator = mdates.AutoDateLocator()
 ax.xaxis.set_major_locator(locator)
 
 plt.plot(x, y)
+plt.ylim(0, 1.5*max(y))
 plt.grid()
 plt.show()

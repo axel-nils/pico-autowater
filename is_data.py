@@ -56,6 +56,6 @@ class DataDict:
 
 if __name__ == "__main__":
     # Example usage:
-    d = DataDict("data/example_data.json")
+    d = DataDict("data/data.json")
     print(d)
     
