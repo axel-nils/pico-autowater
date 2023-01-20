@@ -13,9 +13,9 @@ DATA_FILE = "data/data.json"
 def get_data():
     d = DataDict(DATA_FILE).data
     keys = sorted(d.keys())
-    y = [d[key]["moisture"] for key in keys]
-    x = [pd.to_datetime(key) for key in keys]
-    return x, y
+    time = [pd.to_datetime(key) for key in keys]
+    moisture = [d[key]["moisture"] for key in keys]
+    return time, moisture
 
 
 def set_labels():
