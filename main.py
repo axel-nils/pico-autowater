@@ -16,6 +16,8 @@ DATA_FILE = "data/data.json"
 TIME_FILE = "data/backup_time.txt"
 DATA_DELAY = 3600 * 1000 # Once per hour
 UPDATE_DELAY = 7 * 1000 # Once every 10 seconds
+DRY_THRESHOLD = 825
+WET_THRESHOLD = 850
 
 
 def data_tick(timer):
@@ -33,9 +35,9 @@ def update_tick(timer):
     time.update()
     sensor.update()
     
-    if sensor.mean_moisture() < 825:
+    if sensor.mean_moisture() < DRY_THRESHOLD:
         LED_RED.on()
-    elif sensor.mean_moisture() > 850:
+    elif sensor.mean_moisture() > WET_THRESHOLD:
         LED_RED.off()
     
     LED_GRN.on() if sensor.moisture_series[0] == 0 else LED_GRN.off()  
