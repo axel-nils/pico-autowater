@@ -15,7 +15,6 @@ class DataDict:
         self.debug = debug
         self.data = dict()
         self.read()
-        
 
     def read(self) -> None:
         """

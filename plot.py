@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-DATA_FILE = "data/data.json"
+DATA_FILE = "data/example_data.json"
 
 
 def get_data():
@@ -30,7 +30,7 @@ def apply_formatting():
     locator = mdates.AutoDateLocator()
     ax.xaxis.set_major_locator(locator)
     # formatter = mdates.DateFormatter("%Y-%m-%d %H:%M")
-    formatter = mdates.AutoDateFormatter(locator)
+    formatter = mdates.AutoDateFormatter(locator, defaultfmt="%Y-%m-%d %H:%M")
     ax.xaxis.set_major_formatter(formatter)
 
     min_y, max_y = min(y), max(y)
