@@ -29,36 +29,26 @@ def get_data():
 
 
 def plot_moisture(ax, t, m):
-    ax.set_title("Moisture data")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Soil moisture")
-
     ax.grid()
     ax.plot(t, m, '.-')
+
+    ax.set(title="Moisture data", xlabel="Date", ylabel="Soil moisture")
 
     locator = mdates.AutoDateLocator()
     ax.xaxis.set_major_locator(locator)
     xform = mdates.AutoDateFormatter(locator, defaultfmt="%Y-%m-%d %H:%M")
-    yform = EngFormatter("%")
+    yform = EngFormatter(unit="%")
     ax.xaxis.set_major_formatter(xform), ax.yaxis.set_major_formatter(yform)
 
 
 def plot_drying(ax, te, m, ti):
-    ax.set_title("Drying")
-    ax.set_xlabel("Temperature")
-    ax.set_ylabel("Change in moisture")
+    dmdt = [(m[i+1] - m[i])/((ti[i+1] - ti[i]).seconds / 3600) for i in range(len(ti)-1)]
+    ax.hist2d(te[0:-1], dmdt)
 
-    dm = [m[n + 1] - m[n] for n in range(len(m) - 1)]
-    dt = [(ti[n + 1] - ti[n]).seconds / 3600 for n in range(len(ti) - 1)]
-    timecolor = [(d/(max(dt)), 0.1, 0.9) for d in dt]
+    ax.set(title="Drying", xlabel="Temperature", ylabel="Change in moisture [%-points/h]")
 
-    dmdt = [m / t for m, t in zip(dm, dt)]
-
-    ax.grid()
-    ax.scatter(te[0:-1], dmdt, s=m[0:-1], c=timecolor, alpha=0.5)
-
-    xform = EngFormatter("°C")
-    yform = EngFormatter("%/h")
+    xform = EngFormatter(unit="°C")
+    yform = EngFormatter(places=1)
     ax.xaxis.set_major_formatter(xform), ax.yaxis.set_major_formatter(yform)
 
 
