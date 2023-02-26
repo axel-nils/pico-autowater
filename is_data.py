@@ -54,7 +54,11 @@ class DataDict:
 
 
 if __name__ == "__main__":
-    # Example usage:
+    # Example usage: Combining data.json into example_data.json
     d = DataDict("data/data.json")
-    print(d)
+    d2 = DataDict("data/all_data.json")
+    d2.data.update(d.data)
+    d2.save()
+
+
     
