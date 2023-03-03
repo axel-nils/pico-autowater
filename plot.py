@@ -42,7 +42,7 @@ def plot_moisture(ax, t, m):
 
 
 def plot_temp(ax, ti, te):
-    ax.plot(ti, [t - 3 for t in te], ".-", color="orange", alpha=0.25)
+    ax.plot(ti, te, ".-", color="orange", alpha=0.25)
     
     yform = EngFormatter(unit="°C")
     ax.yaxis.set_major_formatter(yform)
@@ -68,8 +68,8 @@ if __name__ == "__main__":
     fig, (ax1, ax3) = plt.subplots(2)
     ax2 = ax1.twinx()
 
-    plot_moisture(ax1, times, moistures)
-    plot_temp(ax2, times, temps)
+    plot_moisture(ax2, times, moistures)
+    plot_temp(ax1, times, temps)
 
     plot_drying(ax3, times, moistures, temps)
 

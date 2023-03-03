@@ -11,6 +11,7 @@ SCL_PIN = Pin(17)
 SDA_PIN = Pin(16)
 LED_GRN = Pin(11, Pin.OUT)
 LED_RED = Pin(10, Pin.OUT)
+LED_ONBOARD = Pin(25, Pin.OUT)
 
 DATA_FILE = "data/data.json"
 TIME_FILE = "data/backup_time.txt"
