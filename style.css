@@ -9,12 +9,14 @@
 
     --clr-bg1: #F8F8F8;
     --clr-bg2: #F0F0F0;
-    --clr-gb3: #E8E8E8;
+    --clr-bg3: #E8E8E8;
     --clr-fg1: #101010;
-    --clr-green: #013220;
+    --clr-green: #243B10;
+    --clr-red: #3B1210;
+    --clr-cyan: #10393B;
+    --clr-purple: #27103B;
 
-    background: var(--clr-bg1);
-
+    background: var(--clr-green);
 }
 body {
     font-family: var(--ff-body);
@@ -28,44 +30,41 @@ header {
     font-family: var(--ff-special);
     font-size: var(--fs-heading);
     color: var(--clr-bg1);
-    background: var(--clr-green);
+    background-color: var(--clr-green);
 }
 h1 {
     font-family: var(--ff-heading);
     font-size: var(--fs-heading);
 }
 footer {
-    background: #F8F8F8;
+    background-color: var(--clr-bg1);
 }
 .kwarg {
     font-family: var(--ff-special);
     font-size: var(--fs-body);
 }
 .red {
-    background-color: red;
+    background-color: var(--clr-red);
 }
 .green {
-    background-color: green;
+    background-color: var(--clr-green);
 }
 .main {
-   background: #EEEEEE;
-   text-align: left;
+   background-color: var(--clr-bg2);
 }
 .left {
-   background: #E8E8E8;
+   background-color: var(--clr-bg3);
 }
 .right {
-   background: #E8E8E8;
+   background-color: var(--clr-bg3);
 }
 
 button {
+    font-family: var(--ff-special);
     font-size: var(--fs-body);
     color: white;
-    display: block;
     border: none;
     cursor: pointer;
-    height: 100px;
-    width: 100px;
 }
 button:hover {
     opacity: 0.8;
