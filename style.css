@@ -6,20 +6,36 @@
     --fs-special: clamp(3.5rem, 12vw + 1rem, 12rem);
     --fs-heading: 2rem;
     --fs-body: 1rem;
+
+    --clr-bg1: #F8F8F8;
+    --clr-bg2: #F0F0F0;
+    --clr-gb3: #E8E8E8;
+    --clr-fg1: #101010;
+    --clr-green: #013220;
+
+    background: var(--clr-bg1);
+
 }
 body {
     font-family: var(--ff-body);
     font-size: var(--fs-body);
+    line-height: 1.6;
     margin: 0;
+    padding: 0;
+
 }
 header {
     font-family: var(--ff-special);
     font-size: var(--fs-heading);
-    background: #FFFFFF;
-    margin: 1rem;
+    color: var(--clr-bg1);
+    background: var(--clr-green);
+}
+h1 {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-heading);
 }
 footer {
-    background: #303030;
+    background: #F8F8F8;
 }
 .kwarg {
     font-family: var(--ff-special);
@@ -32,23 +48,22 @@ footer {
     background-color: green;
 }
 .main {
-   background: #DDDDDD;
+   background: #EEEEEE;
    text-align: left;
 }
 .left {
-   background: #BBBBBB;
+   background: #E8E8E8;
 }
 .right {
-   background: #BBBBBB;
+   background: #E8E8E8;
 }
 
-
 button {
+    font-size: var(--fs-body);
     color: white;
     display: block;
     border: none;
     cursor: pointer;
-    font-size: 2rem;
     height: 100px;
     width: 100px;
 }
@@ -58,8 +73,7 @@ button:hover {
 
 .wrapper {
     display: flex;
-      flex-flow: row wrap;
-      text-align: center;
+    flex-flow: row wrap;
 }
 .wrapper > * {
   padding: 10px;

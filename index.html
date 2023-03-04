@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
 <head>
     <link rel="stylesheet" href='style.css'/>
     <link href='https://fonts.googleapis.com/css?family=Marcellus|Marcellus+SC|Raleway' rel='stylesheet'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <title>NIS</title>
+    <title>Växthus</title>
 </head>
 <body>
 <div class="wrapper">
-    <header>NILSSONS IRRIGATION SYSTEM</header>
+    <header>Nilssons Växthus</header>
     <div class="main">
-        <h1>LOREM IPSUM</h1>
+        <h1>Välkommen till Nilssons växthus</h1>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit,
             sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
             Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -20,23 +20,28 @@
             pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
             qui officia deserunt mollit anim id est laborum.
         </p>
-    </div>
-    <div class="aside left">
-        <p>The onboard-led is currently:</p>
-        <p class="kwarg">{state}</p>
-        <p>Press the buttons below to turn on/off.</p>
-         <form class="wrapper">
+        <h1>Status</h1>
+        <p>Status uppdaterades senast klockan <span class="kwarg">{time_now}</span>.
+            Den lilla inbyggda led-lampan var då <span class="kwarg">{led_on_off}</span>
+            och temperaturen var <span class="kwarg">{temperature}</span> &deg;C.
+        </p>
+        <h1>Kontroll</h1>
+        <p>Använd knapparna nedan för att slå på och av den lilla led-lampan.</p>
+        <form class="wrapper">
             <button class="green" type="submit" formaction="./lighton"> ON </button>
             <button class="red" type="submit" formaction="./lightoff"> OFF </button>
         </form>
+        <h1>Statistik</h1>
+        <p>Här kommer det snart att finnas statistik</p>
+    </div>
+    <div class="aside left">
     </div>
     <div class="aside right">
-        <p>The temperature was:</p>
-        <p class="kwarg">{temperature} &deg;C at {time_now}</p>
-        <p>There is very little you can do about this.</p>
+
     </div>
-    <footer><a href="https://github.com/axel-nils-chalmers/RBPI-Pico-Irrigation-System">GitHub Repository</a>
-</footer>
+    <footer>
+        <a href="https://github.com/axel-nils-chalmers/RBPI-Pico-Irrigation-System">GitHub Repository</a>
+    </footer>
 </div>
 </body>
 </html>

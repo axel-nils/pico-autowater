@@ -16,25 +16,38 @@ CONVERSION_FACTOR = 3.3 / 65535
 
 
 class DataServer:
-    def __init__(self, max_wait=10, html_file="index.html", css_file="style.css"):
+    def __init__(self, max_wait=10, ssid=WIFI_NAME, pswd=WIFI_PSW):
+        self.ssid = ssid
+        self.pswd = pswd
         self.max_wait = max_wait
-        self.html_file = html_file
-        self.css_file = css_file
-
-        with open(self.css_file, 'r') as file:
-            self.css = str(file.read())
+        
+        self.html_file = "index.html"
+        self.css_file = "style.css"
+        self.error_file = "notfound.html"
+        self.html = None
+        self.css = None
+        self.error_page = None
+        self.preload_files()
 
         self.ip = None
         self.port = 80
         self.host = "0.0.0.0"
 
         self.connect()
+        self.led_on_off = "OFF"
 
-        self.state = "OFF"
         try:
             asyncio.run(self.run())
         finally:
             asyncio.new_event_loop()
+
+    def preload_files(self):
+        with open(self.html_file, "r") as file:
+            self.html = str(file.read())
+        with open(self.css_file, 'r') as file:
+            self.css = str(file.read())
+        with open(self.error_file, 'r') as file:
+            self.error_page = str(file.read())
 
     def connect(self):
         wlan = network.WLAN(network.STA_IF)
@@ -73,37 +86,37 @@ class DataServer:
         except IndexError:
             pass
 
-        header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/css\r\n\r\n'
-        response = ""  # TODO not found page
-
-        print(request)
+        header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n'
+        response = self.error_page
         html_requests = ["/", "/index.html", "/lighton?", "/lightoff?"]
+
+        print(f"Server got request \"{request}\"")
+
+        if request == "/lighton?":
+            LED_ONBOARD.on()
+            self.led_on_off = "ON"
+        elif request == "/lightoff?":
+            LED_ONBOARD.off()
+            self.led_on_off = "OFF"
+
         if request in html_requests:
-            print("assuming html response wanted")
+            print("Server responding with HTML")
             header = 'HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n'
             response = self.create_html_response()
         elif request == "/style.css":
-            print("responding with css")
+            print("Server responding with CSS")
             header = 'HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n'
             response = self.css
-        
-        if request == "/lighton?":
-            LED_ONBOARD.on()
-            self.state = "ON"
-        elif request == "/lightoff?":
-            LED_ONBOARD.off()
-            self.state = "OFF"
 
         return header, response
 
     def create_html_response(self):
+        response = self.html
         temperature = get_temp()
         time_now = get_time()
 
-        with open(self.html_file, "r") as file:
-            response = str(file.read())
         replacements = {"{temperature}": temperature,
-                        "{state}": self.state,
+                        "{led_on_off}": self.led_on_off,
                         "{time_now}": time_now}
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
