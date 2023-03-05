@@ -20,15 +20,12 @@ class DataDict:
         """
         Try reading data from file. If any exception gets thrown, the data attribute remains unchanged.
         """
-        try:
-            with open(self.file_name, "r", encoding="utf-8") as file:
-                content = file.read()
-            self.data = json.loads(content)
-            if self.debug:
-                print(f"successfully read data from {self.file_name}")
-        except:
-            if self.debug:
-                print(f"failed reading data from {self.file_name}")
+
+        with open(self.file_name, "r", encoding="utf-8") as file:
+            content = file.read()
+        self.data = json.loads(content)
+        if self.debug:
+            print(f"successfully read data from {self.file_name}")
 
     def add(self, key: str, value) -> None:
         """
@@ -40,14 +37,11 @@ class DataDict:
         """
         Write dictionary to file
         """
-        try:
-            with open(self.file_name, "w", encoding="utf-8") as file:
-                file.write(json.dumps(self.data))
-                if self.debug:
-                    print(f"successfully saved data to {self.file_name}")
-        except:
+
+        with open(self.file_name, "w", encoding="utf-8") as file:
+            file.write(json.dumps(self.data))
             if self.debug:
-                print(f"failed saving data to {self.file_name}")
+                print(f"successfully saved data to {self.file_name}")
 
     def __str__(self) -> str:
         return "\n".join([str(item) for item in self.data.items()])

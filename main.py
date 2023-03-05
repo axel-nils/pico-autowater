@@ -4,20 +4,21 @@ Main program that automatically runs when Pico is powered
 
 import uasyncio as asyncio
 
+import machine
+import time
+
 from devices import *
-from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS, get_time
+from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc
 
 
 DATA_FILE = "data/data.json"
 
-DRY_THRESHOLD = 825
-WET_THRESHOLD = 850
+DRY_THRESHOLD, WET_THRESHOLD = 825, 850
 
 
 class DataServer:
-    def __init__(self):
-        wifi = WiFi(WIFI_NAME, WIFI_PASS)
-        self.ip = wifi.ip
+    def __init__(self, ip):
+        self.ip = ip
         self.port = 80
         self.host = "0.0.0.0"
 
@@ -25,10 +26,10 @@ class DataServer:
                       "css": "web/style.css", "js": "web/app.js"}
         self.pages = self.preload_pages()
 
-        self.led_on_off = "OFF"
+        self.led_on_off = None
         self.moisture = None
         self.temp = None
-        self.time = get_time()
+        self.datetime = None
 
     def preload_pages(self):
         pages = {}
@@ -63,10 +64,8 @@ class DataServer:
 
         if request == "/lighton?":
             LED_ONBOARD.on()
-            self.led_on_off = "ON"
         elif request == "/lightoff?":
             LED_ONBOARD.off()
-            self.led_on_off = "OFF"
 
         if request in html_requests:
             print("Server responding with HTML")
@@ -85,49 +84,79 @@ class DataServer:
 
     def create_html_response(self):
         response = self.pages["html"]
-        time_now = get_time()
 
         replacements = {"{temperature}": self.temp,
                         "{moisture}": self.moisture,
                         "{led_on_off}": self.led_on_off,
-                        "{time_now}": time_now}
+                        "{time_now}": self.datetime}
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
         return response
 
 
-def data_tick():
+async def update_slow():
     """
     Writes last measurement along with timestamp to file
     """
-    # data.add(str(time), sensor.values())
-    # data.save()
-
-
-async def main():
-    asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
     while True:
-        sensor.update()
-
-        if sensor.mean_moisture() < DRY_THRESHOLD:
-            LED_RED.on()
-            LED_GRN.off()
-        elif sensor.mean_moisture() > DRY_THRESHOLD:
-            LED_RED.off()
-            LED_GRN.on()
-
+        await asyncio.sleep(60)
+        print("slow update")
+        server.datetime = get_datetime()
         server.temp = sensor.temp
         server.moisture = sensor.mean_moisture()
-        server.time = get_time()
-        await asyncio.sleep(1)
+
+        data.add(server.datetime, sensor.values())
+        data.save()
+
+
+async def update_fast():
+    while True:
+        await asyncio.sleep(10)
+        print("fast update")
+        sensor.update()
+
+
+async def set_leds():
+    while True:
+        await asyncio.sleep(2)
+        print("settings leds")
+        server.led_on_off = LED_ONBOARD.value()
+        if sensor.dry():    # Water right away
+            LED_RED.on()
+            LED_GRN.off()
+        elif sensor.wet():  # No need for water
+            LED_RED.off()
+            LED_GRN.on()
+        else:               # Water if right time
+            LED_RED.on()
+            LED_GRN.on()
+
+
+async def task_loop():
+    loop = asyncio.get_event_loop()
+    asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
+    asyncio.create_task(set_leds())
+    asyncio.create_task(update_fast())
+    asyncio.create_task(update_slow())
+    loop.run_forever()
 
 
 if __name__ == "__main__":
-    sensor: SoilSensor = SoilSensor(PIN_SCL, PIN_SDA)
+    wifi = WiFi(WIFI_NAME, WIFI_PASS)
+    set_rtc()
+
+    sensor: SoilSensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
     data: DataDict = DataDict(DATA_FILE)
-    server: DataServer = DataServer()
+    server: DataServer = DataServer(wifi.ip)
+
+    for n in range(3):
+        LED_ONBOARD.on()
+        time.sleep(0.2)
+        LED_ONBOARD.off()
+        time.sleep(0.2)
 
     try:
-        asyncio.run(main())
+        asyncio.run(task_loop())
     finally:
         asyncio.new_event_loop()
+        machine.reset()

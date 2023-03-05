@@ -18,11 +18,14 @@ class SoilSensor:
     MS_TOUCH_BASE = 0x0F
     MS_TOUCH_OFFSET = 0x10
 
-    def __init__(self, scl_pin: Pin, sda_pin: Pin, debug: bool = False):
+    def __init__(self, scl_pin: Pin, sda_pin: Pin, dry_threshold: int, wet_threshold: int, debug: bool = False):
         """
         Uses machine.Pin parameters to initialize I2C communication with sensor unit
         """
         self.i2c: I2C = I2C(0, scl=scl_pin, sda=sda_pin)
+        self.dry_threshold: int = dry_threshold
+        self.wet_threshold: int = wet_threshold
+
         self.temp: int = self.update_moisture()
         self.moisture: int = self.update_moisture()
         self.moisture_series: list[int] = [0, 0, 0, 0, 0]
@@ -95,6 +98,12 @@ class SoilSensor:
         Returns mean of last 5 moisture readings
         """
         return sum(self.moisture_series) // len(self.moisture_series)
+
+    def dry(self) -> bool:
+        return self.mean_moisture() < self.dry_threshold
+
+    def wet(self) -> bool:
+        return self.mean_moisture() > self.wet_threshold
 
     def __str__(self):
         return f"Moisture reading: {self.moisture}. Temperature reading: {self.temp} °C."
