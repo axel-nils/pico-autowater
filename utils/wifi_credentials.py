@@ -1,0 +1,2 @@
+WIFI_NAME = ""
+WIFI_PASS = ""

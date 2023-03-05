@@ -1,82 +1,42 @@
 """
 Main program that automatically runs when Pico is powered
 """
-from machine import Pin
-from time import sleep
-import network
+
 import urequests
 import uasyncio as asyncio
 
-from is_sensor import SoilSensor
-from is_data import DataDict
+from devices import *
+from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS
 
-from my_credentials import WIFI_NAME, WIFI_PSW
-
-SCL_PIN = Pin(17)
-SDA_PIN = Pin(16)
-LED_GRN = Pin(11, Pin.OUT)
-LED_RED = Pin(10, Pin.OUT)
-LED_ONBOARD = Pin("LED", machine.Pin.OUT)
 
 DATA_FILE = "data/data.json"
-TIME_FILE = "data/backup_time.txt"
 TIME_API_URL = "https://www.timeapi.io/api/Time/current/zone?timeZone=Europe/Stockholm"
-DATA_DELAY = 3600 * 1000  # Once per hour
-UPDATE_DELAY = 1 * 1000   # Once every 10 seconds
 DRY_THRESHOLD = 825
 WET_THRESHOLD = 850
 
 
 class DataServer:
-    def __init__(self, max_wait=10, ssid=WIFI_NAME, pswd=WIFI_PSW):
-        self.max_wait = max_wait
-        self.ssid = ssid
-        self.pswd = pswd
-
-        self.html_file = "index.html"
-        self.css_file = "style.css"
-        self.error_file = "notfound.html"
-        self.html = None
-        self.css = None
-        self.error_page = None
-        self.preload_files()
-
-        self.ip = None
+    def __init__(self):
+        wifi = WiFi(WIFI_NAME, WIFI_PASS)
+        self.ip = wifi.ip
         self.port = 80
         self.host = "0.0.0.0"
 
-        self.connect()
+        self.files = {"html": "web/index.html", "error": "web/notfound.html",
+                      "css": "web/style.css", "js": "web/app.js"}
+        self.pages = self.preload_pages()
+
         self.led_on_off = "OFF"
         self.moisture = None
         self.temp = None
         self.time = get_time()
 
-    def preload_files(self):
-        with open(self.html_file, "r") as file:
-            self.html = str(file.read())
-        with open(self.css_file, 'r') as file:
-            self.css = str(file.read())
-        with open(self.error_file, 'r') as file:
-            self.error_page = str(file.read())
-
-    def connect(self):
-        wlan = network.WLAN(network.STA_IF)
-        wlan.active(True)
-        wlan.config(pm=0xa11140)  # Disable power saver-mode
-        wlan.connect(WIFI_NAME, WIFI_PSW)
-
-        while self.max_wait > 0:
-            if wlan.status() < 0 or wlan.status() >= 3:
-                break
-            self.max_wait -= 1
-            print("Waiting for connection...")
-            sleep(1)
-
-        if wlan.status() != 3:
-            raise RuntimeError("Network connection failed")
-        else:
-            self.ip = wlan.ifconfig()[0]
-            print(f"Connected to {WIFI_NAME} with IP-address {self.ip}")
+    def preload_pages(self):
+        pages = {}
+        for name, file_name in self.files.items():
+            with open(file_name, "r") as file:
+                pages[name] = str(file.read())
+        return pages
 
     async def serve(self, reader, writer):
         request_line = await reader.readline()
@@ -97,7 +57,7 @@ class DataServer:
             pass
 
         header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n'
-        response = self.error_page
+        response = self.pages["error"]
         html_requests = ["/", "/index.html", "/lighton?", "/lightoff?"]
 
         print(f"Server got request \"{request}\"")
@@ -116,12 +76,16 @@ class DataServer:
         elif request == "/style.css":
             print("Server responding with CSS")
             header = 'HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n'
-            response = self.css
+            response = self.pages["css"]
+        elif request == "/app.js":
+            print("Server responding with JS")
+            header = 'HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n'
+            response = self.pages["js"]
 
         return header, response
 
     def create_html_response(self):
-        response = self.html
+        response = self.pages["html"]
         time_now = get_time()
 
         replacements = {"{temperature}": self.temp,
@@ -131,23 +95,6 @@ class DataServer:
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
         return response
-
-    async def run(self):
-        asyncio.create_task(asyncio.start_server(self.serve, self.host, self.port))
-        while True:
-            sensor.update()
-
-            if sensor.mean_moisture() < DRY_THRESHOLD:
-                LED_RED.on()
-                LED_GRN.off()
-            elif sensor.mean_moisture() > DRY_THRESHOLD:
-                LED_RED.off()
-                LED_GRN.on()
-
-            server.temp = sensor.temp
-            server.moisture = sensor.mean_moisture()
-            server.time = get_time()
-            await asyncio.sleep(1)
 
 
 def get_datetime_json():
@@ -170,12 +117,30 @@ def data_tick():
     # data.save()
 
 
+async def main():
+    asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
+    while True:
+        sensor.update()
+
+        if sensor.mean_moisture() < DRY_THRESHOLD:
+            LED_RED.on()
+            LED_GRN.off()
+        elif sensor.mean_moisture() > DRY_THRESHOLD:
+            LED_RED.off()
+            LED_GRN.on()
+
+        server.temp = sensor.temp
+        server.moisture = sensor.mean_moisture()
+        server.time = get_time()
+        await asyncio.sleep(1)
+
+
 if __name__ == "__main__":
-    sensor: SoilSensor = SoilSensor(SCL_PIN, SDA_PIN)
+    sensor: SoilSensor = SoilSensor(PIN_SCL, PIN_SDA)
     data: DataDict = DataDict(DATA_FILE)
     server: DataServer = DataServer()
 
     try:
-        asyncio.run(server.run())
+        asyncio.run(main())
     finally:
         asyncio.new_event_loop()
