@@ -2,15 +2,14 @@
 Main program that automatically runs when Pico is powered
 """
 
-import urequests
 import uasyncio as asyncio
 
 from devices import *
-from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS
+from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS, get_time
 
 
 DATA_FILE = "data/data.json"
-TIME_API_URL = "https://www.timeapi.io/api/Time/current/zone?timeZone=Europe/Stockholm"
+
 DRY_THRESHOLD = 825
 WET_THRESHOLD = 850
 
@@ -95,18 +94,6 @@ class DataServer:
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
         return response
-
-
-def get_datetime_json():
-    time_r = urequests.get(TIME_API_URL)
-    time_j = time_r.json()
-    time_r.close()
-    return time_j
-
-
-def get_time():
-    d = get_datetime_json()
-    return d["time"]
 
 
 def data_tick():
