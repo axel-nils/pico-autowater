@@ -22,21 +22,23 @@
             qui officia deserunt mollit anim id est laborum.
         </p>
         <h1>Status</h1>
-        <p>Status uppdaterades senast klockan <span class="kwarg">{time_now}</span>.
-            Den lilla inbyggda led-lampan var då <span class="kwarg">{led_on_off}</span>,
-            temperaturen var <span class="kwarg">{temperature}</span> &deg;C och jordfuktigheten var
+        <p>Status uppdaterades senast <span class="kwarg">{time_now}</span>.
+            Lufttemperaturen var då <span class="kwarg">{temperature}</span> &deg;C och jordfuktigheten var
             <span class="kwarg">{moisture}</span>.
         </p>
         <h1>Kontroll</h1>
-        <p>Använd knapparna nedan för att slå på och av den lilla led-lampan.</p>
+        <p>Använd knapparna nedan för att slå på och av bevattningen och (den lilla led-lampan) manuellt.
+            Den är för närvarande <span class="kwarg">{water_on_off}</span>.
+        </p>
         <form class="wrapper">
-            <button class="green" type="submit" formaction="./lighton"> ON </button>
-            <button class="red" type="submit" formaction="./lightoff"> OFF </button>
+            <button class="green" type="submit" formaction="./water_on"> ON </button>
+            <button class="red" type="submit" formaction="./water_off"> OFF </button>
         </form>
         <h1>Statistik</h1>
         <script src="app.js" defer></script>
-        <p>Här kommer det snart att finnas statistik</p>
+        <p>Här kommer det snart att finnas statistik.</p>
         <div id="chart_div"></div>
+        <p>Här är sidan slut.</p>
     </div>
     <div class="aside left">
     </div>

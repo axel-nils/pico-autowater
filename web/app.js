@@ -3,20 +3,46 @@ google.charts.load('current', {
 });
 google.charts.setOnLoadCallback(drawTemps);
 
+function loadFile(filePath) {
+  var result = null;
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", filePath, false);
+  xmlhttp.send();
+  if (xmlhttp.status==200) {
+    result = xmlhttp.responseText;
+  }
+  return result;
+}
+
 function drawTemps() {
+
+  const file = loadFile("data/data.json");
+  console.log(file);
+
+  const dict = JSON.parse(file);
+  console.log(dict)
+
+  var arr = [];
+
+  for (let key of Object.keys(dict)) {
+    arr.push([new Date(key), dict[key].moisture / 10, dict[key].temp]);
+  }
+
+  arr.sort(function(a, b) {
+    return b[0] - a[0];
+  });
+
+  console.log(arr)
 
   var data = new google.visualization.DataTable();
   data.addColumn('datetime', 'X');
+  data.addColumn('number', 'Fuktighet');
   data.addColumn('number', 'Temperatur');
 
-  data.addRows([
-    [new Date(2023, 2, 5, 8), 20],
-    [new Date(2023, 2, 5, 12), 22],
-    [new Date(2023, 2, 5, 16), 23],
-  ]);
+  data.addRows(arr);
 
   var options = {
-    title: 'Hittepådata',
+    title: 'Riktig data',
     hAxis: {
       title: 'Tid'
     },
@@ -24,7 +50,7 @@ function drawTemps() {
       title: 'Celsius'
     },
     backgroundColor: '#F0F0F0',
-    colors: ['#243B10'],
+    colors: ['#243B10', '#3B1210'],
     curveType: 'function',
     fontName: 'Raleway'
   };

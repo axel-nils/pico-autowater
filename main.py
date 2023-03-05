@@ -23,10 +23,10 @@ class DataServer:
         self.host = "0.0.0.0"
 
         self.files = {"html": "web/index.html", "error": "web/notfound.html",
-                      "css": "web/style.css", "js": "web/app.js"}
+                      "css": "web/style.css", "js": "web/app.js", "json": "data/data.json"}
         self.pages = self.preload_pages()
 
-        self.led_on_off = None
+        self.water_on_off: bool = False
         self.moisture = None
         self.temp = None
         self.datetime = None
@@ -58,14 +58,14 @@ class DataServer:
 
         header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n'
         response = self.pages["error"]
-        html_requests = ["/", "/index.html", "/lighton?", "/lightoff?"]
+        html_requests = ["/", "/index.html", "/water_on?", "/water_off?"]
 
         print(f"Server got request \"{request}\"")
 
-        if request == "/lighton?":
-            LED_ONBOARD.on()
-        elif request == "/lightoff?":
-            LED_ONBOARD.off()
+        if request == "/water_on?":
+            self.water_on_off = True
+        elif request == "/water_off?":
+            self.water_on_off = False
 
         if request in html_requests:
             print("Server responding with HTML")
@@ -79,6 +79,10 @@ class DataServer:
             print("Server responding with JS")
             header = 'HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n'
             response = self.pages["js"]
+        elif request == "/data/data.json":
+            print("Server responding with JSON")
+            header = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n'
+            response = self.pages["json"]
 
         return header, response
 
@@ -87,7 +91,7 @@ class DataServer:
 
         replacements = {"{temperature}": self.temp,
                         "{moisture}": self.moisture,
-                        "{led_on_off}": self.led_on_off,
+                        "{water_on_off}": self.water_on_off,
                         "{time_now}": self.datetime}
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
@@ -99,8 +103,7 @@ async def update_slow():
     Writes last measurement along with timestamp to file
     """
     while True:
-        await asyncio.sleep(60)
-        print("slow update")
+        await asyncio.sleep(900)
         server.datetime = get_datetime()
         server.temp = sensor.temp
         server.moisture = sensor.mean_moisture()
@@ -112,15 +115,13 @@ async def update_slow():
 async def update_fast():
     while True:
         await asyncio.sleep(10)
-        print("fast update")
         sensor.update()
 
 
 async def set_leds():
     while True:
-        await asyncio.sleep(2)
-        print("settings leds")
-        server.led_on_off = LED_ONBOARD.value()
+        await asyncio.sleep(1)
+        LED_ONBOARD.value(server.water_on_off)
         if sensor.dry():    # Water right away
             LED_RED.on()
             LED_GRN.off()
