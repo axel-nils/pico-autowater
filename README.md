@@ -14,6 +14,7 @@ Collects timestamped moisture and temperature data at a regular frequency to dis
 * LEDs
 * Cables and power supply
 ## Todo
+* Fix server performance with random strings for requests (to prevent caching) and gzip (to reduce file sizes)
 * Images and schematics showing the system
 * Automated watering
 * More advanced data analysis
