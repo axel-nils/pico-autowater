@@ -1,7 +1,7 @@
 google.charts.load('current', {
   packages: ['corechart', 'line']
 });
-google.charts.setOnLoadCallback(drawTemps);
+google.charts.setOnLoadCallback(drawChart);
 
 function loadFile(filePath) {
   var result = null;
@@ -14,48 +14,48 @@ function loadFile(filePath) {
   return result;
 }
 
-function drawTemps() {
+async function getFile(filePath) {
+  const response = await fetch(filePath);
+  const data = await response.json();
+  return data;
+}
 
-  const file = loadFile("data/data.json");
-  console.log(file);
+function drawChart() {
+  const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+  const fs = parseInt(window.getComputedStyle(document.getElementById('download_btn')).fontSize);
+  const dict = getFile("data/data.json");
 
-  const dict = JSON.parse(file);
-  console.log(dict)
+  /*const file = loadFile("data/data.json");
+  const dict = JSON.parse(file);*/
 
-  var arr = [];
+  let arr = [];
 
   for (let key of Object.keys(dict)) {
-    arr.push([new Date(key), dict[key].moisture / 10, dict[key].temp]);
+    arr.push([new Date(key), dict[key].moisture, dict[key].temp]);
   }
 
   arr.sort(function(a, b) {
     return b[0] - a[0];
   });
 
-  console.log(arr)
-
-  var data = new google.visualization.DataTable();
+  let data = new google.visualization.DataTable();
   data.addColumn('datetime', 'X');
   data.addColumn('number', 'Fuktighet');
   data.addColumn('number', 'Temperatur');
 
   data.addRows(arr);
 
-  var options = {
-    title: 'Riktig data',
+  const options = {
     hAxis: {
       title: 'Tid'
-    },
-    vAxis: {
-      title: 'Celsius'
     },
     backgroundColor: '#F0F0F0',
     colors: ['#243B10', '#3B1210'],
     curveType: 'function',
-    fontName: 'Raleway'
+    fontName: 'Raleway',
+    fontSize: fs,
+    legend: {position: 'bottom'}
   };
-
-  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
   chart.draw(data, options);
 }

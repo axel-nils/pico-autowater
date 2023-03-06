@@ -1,53 +1,63 @@
 <!DOCTYPE html>
 <html lang="sv">
-<head>
-    <link rel="stylesheet" href='style.css'/>
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <head>
     <link href='https://fonts.googleapis.com/css?family=Marcellus|Marcellus+SC|Raleway' rel='stylesheet'>
+    <link href='style.css' rel="stylesheet">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Växthus</title>
-</head>
-<body>
-<div class="wrapper">
+  </head>
+
+  <body>
     <header>Nilssons Växthus</header>
     <div class="main">
-        <h1>Välkommen till Nilssons växthus</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-            qui officia deserunt mollit anim id est laborum.
-        </p>
-        <h1>Status</h1>
-        <p>Status uppdaterades senast <span class="kwarg">{time_now}</span>.
-            Lufttemperaturen var då <span class="kwarg">{temperature}</span> &deg;C och jordfuktigheten var
-            <span class="kwarg">{moisture}</span>.
-        </p>
-        <h1>Kontroll</h1>
-        <p>Använd knapparna nedan för att slå på och av bevattningen och (den lilla led-lampan) manuellt.
-            Den är för närvarande <span class="kwarg">{water_on_off}</span>.
-        </p>
-        <form class="wrapper">
-            <button class="green" type="submit" formaction="./water_on"> ON </button>
-            <button class="red" type="submit" formaction="./water_off"> OFF </button>
-        </form>
-        <h1>Statistik</h1>
-        <script src="app.js" defer></script>
-        <p>Här kommer det snart att finnas statistik.</p>
-        <div id="chart_div"></div>
-        <p>Här är sidan slut.</p>
-    </div>
-    <div class="aside left">
-    </div>
-    <div class="aside right">
+      <h1>Status</h1>
+      <p>
+        Vid senaste mätningen (<span class="kwarg">{time_now}</span>)
+        var jordfuktigheten <span class="kwarg">{moisture}</span>
+        och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C.
+      </p>
+      <h1>Historik</h1>
+      <script src="app.js" defer></script>
+      <div id="chart_div"></div>
+      <a class="wrapper" href="/data/data.json" style="text-decoration: none" download>
+        <button id="download_btn" class="green" type="submit"> Ladda ner data </button>
+      </a>
 
     </div>
+    <div class="side">
+      <h1>Kontrollpanel</h1>
+      <div>
+        <p>
+          Styr bevattnigen manuellt med knapparna.
+          Den är för närvarande <span class="kwarg">{water_on_off}</span>.
+          Om du slår på den manuellt kommer den vara på tills fuktigheten är över den övre gränsen.
+        </p>
+        <form class="wrapper">
+          <button class="green" type="submit" formaction="./water_on"> ON </button>
+          <button class="red" type="submit" formaction="./water_off"> OFF </button>
+        </form>
+        <p>
+          Gränsen för att börja vattna är <span class="kwarg">{dry_threshold}</span>
+          och gränsen för att sluta är <span class="kwarg">{wet_threshold}</span>.
+          Använd fälten nedan för att ändra dessa värden.
+        </p>
+        <form class="wrapper">
+          <div class="settings">
+            <label for="wet_threshold" style="display: inline;">Övre gräns:</label>
+            <input type="number" id="wet_threshold" name="wet_threshold" min="0" max="1000" step="25" value="{wet_threshold}">
+            <label for="dry_threshold" style="display: inline;">Undre gräns:</label>
+            <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="1000" step="25" value="{dry_threshold}">
+          </div>
+          <button class="green" type="submit" formaction="./set_thresholds"> Uppdatera </button>
+        </form>
+      </div>
+    </div>
     <footer>
-        <a href="https://github.com/axel-nils-chalmers/RBPI-Pico-Irrigation-System">GitHub Repository</a>
+      <a href="https://github.com/axel-nils-chalmers/RBPI-Pico-Irrigation-System">GitHub Repository</a>
     </footer>
-</div>
-</body>
+  </body>
+
 </html>
