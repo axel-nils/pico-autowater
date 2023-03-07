@@ -47,16 +47,16 @@
         <form class="wrapper">
           <div class="settings">
             <label for="wet_threshold" style="display: inline;">Övre gräns:</label>
-            <input type="number" id="wet_threshold" name="wet_threshold" min="0" max="1000" step="25" value="{wet_threshold}">
+            <input type="number" id="wet_threshold" name="wet_threshold" min="0" max="1000" step="25" value="{wet_threshold}" required>
             <label for="dry_threshold" style="display: inline;">Undre gräns:</label>
-            <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="1000" step="25" value="{dry_threshold}">
+            <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="1000" step="25" value="{dry_threshold}" required>
           </div>
           <button class="green" type="submit" formaction="./set_thresholds"> Uppdatera </button>
         </form>
       </div>
     </div>
     <footer>
-      <a href="https://github.com/axel-nils-chalmers/RBPI-Pico-Irrigation-System">GitHub Repository</a>
+      <a href="https://github.com/axel-nils/pico-autowater">GitHub Repository</a>
     </footer>
   </body>
 
