@@ -87,9 +87,8 @@ button:hover {
   opacity: 0.8;
 }
 
-#chart_div {
+#m_chart_div, #t_chart_div {
   min-height: 400px;
-  margin: 20px;
 }
 
 div.settings {

@@ -8,7 +8,7 @@ import machine
 import time
 
 from devices import *
-from utils import DataDict, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc
+from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc
 
 
 DATA_FILE = "data/data.json"
@@ -108,8 +108,8 @@ async def update_slow():
         server.temp = sensor.temp
         server.moisture = sensor.mean_moisture()
 
-        data.add(server.datetime, sensor.values())
-        data.save()
+        entry = data.Entry(server.datetime, server.moisture, server.temp)
+        data.append_entry(entry)
 
 
 async def update_fast():
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     set_rtc()
 
     sensor: SoilSensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
-    data: DataDict = DataDict(DATA_FILE)
+    data: DataFile = DataFile(DATA_FILE)
     server: DataServer = DataServer(wifi.ip)
 
     for n in range(3):

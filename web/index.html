@@ -21,7 +21,8 @@
       </p>
       <h1>Historik</h1>
       <script src="app.js" defer></script>
-      <div id="chart_div"></div>
+      <div id="m_chart_div"></div>
+      <div id="t_chart_div"></div>
       <a class="wrapper" href="/data/data.json" style="text-decoration: none" download>
         <button id="download_btn" class="green" type="submit"> Ladda ner data </button>
       </a>
@@ -40,16 +41,16 @@
           <button class="red" type="submit" formaction="./water_off"> OFF </button>
         </form>
         <p>
-          Gränsen för att börja vattna är <span class="kwarg">{dry_threshold}</span>
-          och gränsen för att sluta är <span class="kwarg">{wet_threshold}</span>.
+          Gränsen för att börja vattna är <span class="kwarg">{dry_threshold}</span>%
+          och gränsen för att sluta är <span class="kwarg">{wet_threshold}</span>%.
           Använd fälten nedan för att ändra dessa värden.
         </p>
         <form class="wrapper">
           <div class="settings">
             <label for="wet_threshold" style="display: inline;">Övre gräns:</label>
-            <input type="number" id="wet_threshold" name="wet_threshold" min="0" max="1000" step="25" value="{wet_threshold}" required>
+            <input type="number" id="wet_threshold" name="wet_threshold" min="0" max="100" step="5" value="{wet_threshold}" required>
             <label for="dry_threshold" style="display: inline;">Undre gräns:</label>
-            <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="1000" step="25" value="{dry_threshold}" required>
+            <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="100" step="5" value="{dry_threshold}" required>
           </div>
           <button class="green" type="submit" formaction="./set_thresholds"> Uppdatera </button>
         </form>
