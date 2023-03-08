@@ -7,9 +7,9 @@ from collections import namedtuple
 
 
 class DataFile:
-    Entry = namedtuple("Entry", ["d", "m", "t"])  # For datetime, moisture and temperature
+    Entry = namedtuple("Entry", ["datetime", "moisture", "temperature"])  # For datetime, moisture and temperature
     template_json = {
-        "dataKeys": ["d", "m", "t"],
+        "data_columns": ["datetime", "moisture", "temperature"],
         "data": []
     }
 
@@ -19,7 +19,7 @@ class DataFile:
 
     def save_json(self) -> None:
         with open(self.filename, "w") as f:
-            json.dump(self.json, f, separators=(',', ':'), indent=0)
+            json.dump(self.json, f, separators=(',', ':'))
 
     def get_json(self) -> dict:
         try:
@@ -32,7 +32,7 @@ class DataFile:
 
     def append_entry(self, entry: Entry) -> None:
         data: list = self.data()
-        data.append(entry._asdict())
+        data.append(entry)
         self.save_json()
 
     def entries(self) -> int:
@@ -47,12 +47,14 @@ if __name__ == "__main__":
     Example usage
     """
     import random
-    datafile = DataFile("../data/test_data.json")
+    datafile = DataFile("../data/test2_data.json")
     print(datafile.data())
+    m = 50
+    t = 18
     for i in range(10, 23):
         dt_str = "2023-03-07T" + str(i) + ":41:43.0191136"
-        m = random.randint(600, 1000)
-        t = random.randint(16, 23)
+        m += random.randint(-10, 10)
+        t += random.randint(-2, 2)
         e = datafile.Entry(dt_str, m, t)
         print(e)
         datafile.append_entry(e)

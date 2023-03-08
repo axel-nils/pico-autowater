@@ -18,23 +18,25 @@ class SoilSensor:
     MS_TOUCH_BASE = 0x0F
     MS_TOUCH_OFFSET = 0x10
 
-    def __init__(self, scl_pin: Pin, sda_pin: Pin, dry_threshold: int, wet_threshold: int, debug: bool = False):
+    MIN_RAW_MOISTURE = 700
+    MAX_RAW_MOISTURE = 1015
+
+    def __init__(self, scl_pin: Pin, sda_pin: Pin, dry_threshold, wet_threshold):
         """
         Uses machine.Pin parameters to initialize I2C communication with sensor unit
+        Dry and wet thresholds should be set to values between 0 and 100
         """
         self.i2c: I2C = I2C(0, scl=scl_pin, sda=sda_pin)
+
+        self.temp: int = 0
+        self.raw_moisture: int = 0
+        self.moisture: int = 0
+        self.moisture_series: list[int] = []
+
         self.dry_threshold: int = dry_threshold
         self.wet_threshold: int = wet_threshold
-
-        self.temp: int = self.update_moisture()
-        self.moisture: int = self.update_moisture()
-        self.moisture_series: list[int] = [0, 0, 0, 0, 0]
-
-        if debug:
-            devices = self.i2c.scan()
-            if devices:
-                for device in devices:
-                    print(hex(device))
+        self.dry: bool = False
+        self.wet: bool = False
 
     def read_sensor(self, base, offset: int, nbytes: int) -> bytearray:
         """
@@ -47,37 +49,28 @@ class SoilSensor:
         buf = self.i2c.readfrom_mem(self.MS_ADDR, offset, nbytes)
         return buf
 
-    def update_temp(self) -> int:
+    def update_temp(self):
         """
         Updates and returns the measured temperature
         """
         buf = bytearray(self.read_sensor(self.MS_TEMP_BASE, self.MS_TEMP_OFFSET, 4))
         buf[0] = buf[0] & 0x3F
-        temp = 0.00001525878 * struct.unpack(">I", buf)[0]
+        temp = int(0.00001525878 * struct.unpack(">I", buf)[0])
         self.temp = temp
-        return temp
 
-    def update_moisture(self) -> int:
+    def update_moisture(self):
         """
-        Updates and returns the measured moisture
+        Updates the measured moisture
         """
         buf = self.read_sensor(self.MS_TOUCH_BASE, self.MS_TOUCH_OFFSET, 2)
-        moisture = struct.unpack(">H", buf)[0]
-        self.moisture = moisture
-        return moisture
+        self.raw_moisture = struct.unpack(">H", buf)[0]
 
-    def update_moisture_series(self) -> list[int]:
-        """
-        Updates moisture series
-        """
-        new_series = []
-        for i, m in enumerate(self.moisture_series):
-            if i == 0:
-                continue
-            new_series.append(m)
-        new_series.append(self.moisture)
-        self.moisture_series = new_series
-        return new_series
+        if len(self.moisture_series) >= 5:
+            self.moisture_series.pop(0)
+        self.moisture_series.append(self.raw_moisture)
+
+        mean = sum(self.moisture_series) // len(self.moisture_series)
+        self.moisture = 100 * (mean - self.MIN_RAW_MOISTURE) / (self.MAX_RAW_MOISTURE - self.MIN_RAW_MOISTURE)
 
     def update(self):
         """'
@@ -85,25 +78,34 @@ class SoilSensor:
         """
         self.update_temp()
         self.update_moisture()
-        self.update_moisture_series()
+        self.wet = self.moisture > self.wet_threshold
+        self.dry = self.moisture < self.dry_threshold
 
-    def values(self) -> dict:
+    def values(self) -> tuple:
         """
-        Returns dict with sensor values
+        Returns tuple with moisture and temp values
         """
-        return {"moisture": self.mean_moisture(), "temp": self.temp}
-
-    def mean_moisture(self) -> int:
-        """
-        Returns mean of last 5 moisture readings
-        """
-        return sum(self.moisture_series) // len(self.moisture_series)
-
-    def dry(self) -> bool:
-        return self.mean_moisture() < self.dry_threshold
-
-    def wet(self) -> bool:
-        return self.mean_moisture() > self.wet_threshold
+        return self.moisture, self.temp
 
     def __str__(self):
-        return f"Moisture reading: {self.moisture}. Temperature reading: {self.temp} °C."
+        return f"moisture: {self.moisture}%, temperature reading: {self.temp} °C."
+
+
+if __name__ == "__main__":
+    """
+    Run this. Set min and max moisture constants to match totally dry and wet soil.
+    """
+    scl = Pin(22, Pin.IN)
+    sda = Pin(21, Pin.IN)
+    i2c = I2C(0, scl=scl, sda=sda)
+
+    devices = i2c.scan()
+    if devices:
+        for device in devices:
+            print(hex(device))
+
+    sensor = SoilSensor(scl, sda, 100, 500)
+    while True:
+        sensor.update()
+        print(sensor.raw_moisture, sensor.temp)
+        sleep(1)

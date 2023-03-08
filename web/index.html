@@ -15,8 +15,8 @@
     <div class="main">
       <h1>Status</h1>
       <p>
-        Vid senaste mätningen (<span class="kwarg">{time_now}</span>)
-        var jordfuktigheten <span class="kwarg">{moisture}</span>
+        Vid senaste mätningen (<span class="kwarg">{datetime}</span>)
+        var jordfuktigheten <span class="kwarg">{moisture}</span>%
         och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C.
       </p>
       <h1>Historik</h1>
@@ -32,8 +32,7 @@
       <h1>Kontrollpanel</h1>
       <div>
         <p>
-          Styr bevattnigen manuellt med knapparna.
-          Den är för närvarande <span class="kwarg">{water_on_off}</span>.
+          Bevattningen är för närvarande <span class="kwarg">{water_on}</span>.
           Om du slår på den manuellt kommer den vara på tills fuktigheten är över den övre gränsen.
         </p>
         <form class="wrapper">

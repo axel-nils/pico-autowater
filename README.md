@@ -9,7 +9,7 @@ The Pico hosts a website to show current status and statistics as well as allow 
 * Raspberry Pi Pico W
 * Adafruit STEMMA Soil Sensor (capacitive, based on ATSAMD10 chip)
 * Relay
-* Solenoid Valve (1/2", NC, 12 V)
+* Solenoid Valve (3/4", NC, 12 V)
 * Water pipe (3/4")
 * Breadboard
 * LEDs

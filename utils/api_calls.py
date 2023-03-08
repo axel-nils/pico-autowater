@@ -31,3 +31,7 @@ def set_rtc() -> None:
     dt = get_datetime_json()
     dtt = dt["year"], dt["month"], dt["day"], dt["dayOfWeek"], dt["hour"], dt["minute"], dt["seconds"], 0
     rtc.datetime(dtt)
+
+
+def is_morning() -> bool:
+    return 6 <= int(get_datetime_json()["hour"]) < 11

@@ -6,16 +6,16 @@ from machine import Pin
 
 
 class WaterValve:
-    def __init__(self, pin: Pin, open_time: int = 10):
+    def __init__(self, pin: Pin):
         self.pin = pin
-        self.opened = False
+        self.is_open = False
 
     def open(self):
-        if not self.opened:
-            self.opened = True
+        if not self.is_open:
+            self.is_open = True
             self.pin.on()
 
     def close(self):
-        if self.opened:
-            self.opened = False
+        if self.is_open:
+            self.is_open = False
             self.pin.off()

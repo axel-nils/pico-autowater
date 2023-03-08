@@ -8,7 +8,7 @@ import machine
 import time
 
 from devices import *
-from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc
+from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc, is_morning
 
 
 DATA_FILE = "data/data.json"
@@ -25,11 +25,8 @@ class DataServer:
         self.files = {"html": "web/index.html", "error": "web/notfound.html",
                       "css": "web/style.css", "js": "web/app.js", "json": "data/data.json"}
         self.pages = self.preload_pages()
-
-        self.water_on_off: bool = False
-        self.moisture = None
-        self.temp = None
-        self.datetime = None
+        self.water_on = False
+        self.water_off = False
 
     def preload_pages(self):
         pages = {}
@@ -56,43 +53,42 @@ class DataServer:
         except IndexError:
             pass
 
-        header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n'
+        header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
         response = self.pages["error"]
-        html_requests = ["/", "/index.html", "/water_on?", "/water_off?"]
+        html_requests = ["/", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
 
         print(f"Server got request \"{request}\"")
 
         if request == "/water_on?":
-            self.water_on_off = True
+            self.water_on = True
+            self.water_off = False
         elif request == "/water_off?":
-            self.water_on_off = False
+            self.water_off = True
+            self.water_on = False
+        elif request == "/set_thresholds?":
+            raise NotImplementedError  # TODO: Implement this
 
         if request in html_requests:
             print("Server responding with HTML")
-            header = 'HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n'
-            response = self.create_html_response()
+            header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n"
+            response = self.create_html_response(REPLACEMENTS)
         elif request == "/style.css":
             print("Server responding with CSS")
-            header = 'HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n'
+            header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n"
             response = self.pages["css"]
         elif request == "/app.js":
             print("Server responding with JS")
-            header = 'HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n'
+            header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n"
             response = self.pages["js"]
         elif request == "/data/data.json":
             print("Server responding with JSON")
-            header = 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n'
+            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=604800\r\n\r\n"
             response = self.pages["json"]
 
         return header, response
 
-    def create_html_response(self):
+    def create_html_response(self, replacements):
         response = self.pages["html"]
-
-        replacements = {"{temperature}": self.temp,
-                        "{moisture}": self.moisture,
-                        "{water_on_off}": self.water_on_off,
-                        "{time_now}": self.datetime}
         for r in replacements:
             response = response.replace(r, str(replacements[r]))
         return response
@@ -104,33 +100,43 @@ async def update_slow():
     """
     while True:
         await asyncio.sleep(900)
-        server.datetime = get_datetime()
-        server.temp = sensor.temp
-        server.moisture = sensor.mean_moisture()
-
-        entry = data.Entry(server.datetime, server.moisture, server.temp)
+        datetime = get_datetime()
+        entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
+
+        REPLACEMENTS["{temperature}"] = sensor.temp
+        REPLACEMENTS["{moisture}"] = sensor.moisture
+        REPLACEMENTS["{water_on}"] = valve.is_open
+        REPLACEMENTS["{datetime}"] = datetime
+        REPLACEMENTS["{dry_threshold}"] = DRY_THRESHOLD
+        REPLACEMENTS["{wet_threshold}"] = WET_THRESHOLD
 
 
 async def update_fast():
     while True:
         await asyncio.sleep(10)
         sensor.update()
+        valve.open() if LED_GRN.value() else valve.close()
 
 
 async def set_leds():
     while True:
         await asyncio.sleep(1)
-        LED_ONBOARD.value(server.water_on_off)
-        if sensor.dry():    # Water right away
-            LED_RED.on()
+        LED_RED.value(not sensor.wet)
+
+        if server.water_on:
+            LED_GRN.on()
+            server.water_on = False
+        elif server.water_off:
             LED_GRN.off()
-        elif sensor.wet():  # No need for water
-            LED_RED.off()
-            LED_GRN.on()
-        else:               # Water if right time
-            LED_RED.on()
-            LED_GRN.on()
+            server.water_off = False
+        else:
+            if sensor.wet:
+                LED_GRN.off()
+            elif sensor.dry:
+                LED_GRN.on()
+            else:
+                LED_GRN.value(is_morning())
 
 
 async def task_loop():
@@ -146,9 +152,12 @@ if __name__ == "__main__":
     wifi = WiFi(WIFI_NAME, WIFI_PASS)
     set_rtc()
 
-    sensor: SoilSensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
-    data: DataFile = DataFile(DATA_FILE)
-    server: DataServer = DataServer(wifi.ip)
+    sensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
+    valve = WaterValve(PIN_VALVE)
+    data = DataFile(DATA_FILE)
+    server = DataServer(wifi.ip)
+
+    REPLACEMENTS = {}
 
     for n in range(3):
         LED_ONBOARD.on()
