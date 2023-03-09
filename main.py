@@ -82,7 +82,7 @@ class DataServer:
             response = self.pages["js"]
         elif request == "/data/data.json":
             print("Server responding with JSON")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=604800\r\n\r\n"
+            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=600\r\n\r\n"
             response = self.pages["json"]
 
         return header, response
