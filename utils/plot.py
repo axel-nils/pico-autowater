@@ -2,13 +2,13 @@
 For plotting data
 """
 
-from is_data import DataDict
+from data_file import DataFile
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import EngFormatter
 
-DATA_FILE = "data/all_data.json"
+DATA_FILE = "../data/all_data.json"
 MIN_MOISTURE = 600
 
 
@@ -17,7 +17,7 @@ def normalize(values: list, min_from: int, max_from: int, min_to: int, max_to: i
 
 
 def get_data():
-    d = DataDict(DATA_FILE).data
+    d = DataFile(DATA_FILE).data
     keys = sorted(d.keys())
 
     time: list = [pd.to_datetime(key) for key in keys]

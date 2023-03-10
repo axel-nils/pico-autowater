@@ -70,7 +70,7 @@ class SoilSensor:
         self.moisture_series.append(self.raw_moisture)
 
         mean = sum(self.moisture_series) // len(self.moisture_series)
-        self.moisture = 100 * (mean - self.MIN_RAW_MOISTURE) / (self.MAX_RAW_MOISTURE - self.MIN_RAW_MOISTURE)
+        self.moisture = int(100 * (mean - self.MIN_RAW_MOISTURE) / (self.MAX_RAW_MOISTURE - self.MIN_RAW_MOISTURE))
 
     def update(self):
         """'

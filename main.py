@@ -13,7 +13,7 @@ from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc, i
 
 DATA_FILE = "data/data.json"
 
-DRY_THRESHOLD, WET_THRESHOLD = 825, 850
+DRY_THRESHOLD, WET_THRESHOLD = 50, 90
 
 
 class DataServer:
@@ -70,19 +70,19 @@ class DataServer:
 
         if request in html_requests:
             print("Server responding with HTML")
-            header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n"
+            header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.create_html_response(REPLACEMENTS)
         elif request == "/style.css":
             print("Server responding with CSS")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n"
+            header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["css"]
         elif request == "/app.js":
             print("Server responding with JS")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n"
+            header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["js"]
         elif request == "/data/data.json":
             print("Server responding with JSON")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=600\r\n\r\n"
+            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["json"]
 
         return header, response
@@ -99,7 +99,6 @@ async def update_slow():
     Writes last measurement along with timestamp to file
     """
     while True:
-        await asyncio.sleep(900)
         datetime = get_datetime()
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
@@ -111,17 +110,21 @@ async def update_slow():
         REPLACEMENTS["{dry_threshold}"] = DRY_THRESHOLD
         REPLACEMENTS["{wet_threshold}"] = WET_THRESHOLD
 
+        with open("data/data.json", "r") as file:
+            server.pages["json"] = str(file.read())
+
+        await asyncio.sleep(900)
+
 
 async def update_fast():
     while True:
-        await asyncio.sleep(10)
         sensor.update()
         valve.open() if LED_GRN.value() else valve.close()
+        await asyncio.sleep(10)
 
 
 async def set_leds():
     while True:
-        await asyncio.sleep(1)
         LED_RED.value(not sensor.wet)
 
         if server.water_on:
@@ -137,6 +140,8 @@ async def set_leds():
                 LED_GRN.on()
             else:
                 LED_GRN.value(is_morning())
+
+        await asyncio.sleep(1)
 
 
 async def task_loop():

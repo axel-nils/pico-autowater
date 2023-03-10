@@ -7,7 +7,7 @@ from collections import namedtuple
 
 
 class DataFile:
-    Entry = namedtuple("Entry", ["datetime", "moisture", "temperature"])  # For datetime, moisture and temperature
+    Entry = namedtuple("Entry", ["datetime", "moisture", "temperature"])
     template_json = {
         "data_columns": ["datetime", "moisture", "temperature"],
         "data": []
@@ -16,6 +16,7 @@ class DataFile:
     def __init__(self, filename):
         self.filename = filename
         self.json = self.get_json()
+        self.save_json()
 
     def save_json(self) -> None:
         with open(self.filename, "w") as f:
@@ -25,14 +26,14 @@ class DataFile:
         try:
             with open(self.filename, "r") as f:
                 json_object = json.load(f)
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
+        except:
             json_object = DataFile.template_json
             print(f"Failed reading {self.filename}")
         return json_object
 
     def append_entry(self, entry: Entry) -> None:
         data: list = self.data()
-        data.append(entry)
+        data.append([value for value in entry])
         self.save_json()
 
     def entries(self) -> int:
@@ -56,6 +57,5 @@ if __name__ == "__main__":
         m += random.randint(-10, 10)
         t += random.randint(-2, 2)
         e = datafile.Entry(dt_str, m, t)
-        print(e)
+        print([value for value in e])
         datafile.append_entry(e)
-
