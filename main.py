@@ -8,7 +8,7 @@ import machine
 import time
 
 from devices import *
-from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, set_rtc, is_morning
+from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, get_time, set_rtc, is_morning
 
 
 DATA_FILE = "data/data.json"
@@ -94,7 +94,7 @@ class DataServer:
         return response
 
 
-async def update_slow():
+async def update_file():
     """
     Writes last measurement along with timestamp to file
     """
@@ -102,13 +102,6 @@ async def update_slow():
         datetime = get_datetime()
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
-
-        REPLACEMENTS["{temperature}"] = sensor.temp
-        REPLACEMENTS["{moisture}"] = sensor.moisture
-        REPLACEMENTS["{water_on}"] = valve.is_open
-        REPLACEMENTS["{datetime}"] = datetime
-        REPLACEMENTS["{dry_threshold}"] = DRY_THRESHOLD
-        REPLACEMENTS["{wet_threshold}"] = WET_THRESHOLD
 
         with open("data/data.json", "r") as file:
             server.pages["json"] = str(file.read())
@@ -120,6 +113,14 @@ async def update_fast():
     while True:
         sensor.update()
         valve.open() if LED_GRN.value() else valve.close()
+
+        REPLACEMENTS["{temperature}"] = sensor.temp
+        REPLACEMENTS["{moisture}"] = sensor.moisture
+        REPLACEMENTS["{water_on}"] = valve.is_open
+        REPLACEMENTS["{datetime}"] = get_time()
+        REPLACEMENTS["{dry_threshold}"] = DRY_THRESHOLD
+        REPLACEMENTS["{wet_threshold}"] = WET_THRESHOLD
+        REPLACEMENTS["{is_morning}"] = is_morning()
         await asyncio.sleep(10)
 
 
@@ -149,7 +150,7 @@ async def task_loop():
     asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
     asyncio.create_task(set_leds())
     asyncio.create_task(update_fast())
-    asyncio.create_task(update_slow())
+    asyncio.create_task(update_file())
     loop.run_forever()
 
 
