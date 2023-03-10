@@ -18,7 +18,8 @@ def get_datetime() -> str:
 
 
 def get_time() -> str:
-    return str(time.time())
+    time_tuple = time.localtime(time.time())
+    return f"{time_tuple[3]}:{time_tuple[4]}:{time_tuple[5]}"
 
 
 def get_date() -> str:
