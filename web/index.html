@@ -18,7 +18,12 @@
         Vid senaste mätningen (<span class="kwarg">{datetime}</span>)
         var jordfuktigheten <span class="kwarg">{moisture}</span>%
         och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C.
-        Morgon just nu? <span class="kwarg">{is_morning}</span>.
+      </p>
+      <p>
+        Gränsen för att börja vattna är <span class="kwarg">{dry_threshold}</span>%
+        och gränsen för att sluta är <span class="kwarg">{wet_threshold}</span>%.
+        Bevattningen går igång automatiskt om jordfuktigheten går under undre gränsen eller om det är tidigt på dagen
+        (<span class="kwarg">{is_morning}</span>) och jordfuktigheten är under den övre gränsen. 
       </p>
       <h1>Historik</h1>
       <script src="app.js" defer></script>
@@ -41,8 +46,6 @@
           <button class="red" type="submit" formaction="./water_off"> OFF </button>
         </form>
         <p>
-          Gränsen för att börja vattna är <span class="kwarg">{dry_threshold}</span>%
-          och gränsen för att sluta är <span class="kwarg">{wet_threshold}</span>%.
           Använd fälten nedan för att ändra dessa värden.
         </p>
         <form class="wrapper">
@@ -52,7 +55,7 @@
             <label for="dry_threshold" style="display: inline;">Undre gräns:</label>
             <input type="number" id="dry_threshold" name="dry_threshold" min="0" max="100" step="5" value="{dry_threshold}" required>
           </div>
-          <button class="green" type="submit" formaction="./set_thresholds"> Uppdatera </button>
+          <button class="green" type="submit" formaction="./set_thresholds"> Uppdatera gränser </button>
         </form>
       </div>
     </div>
