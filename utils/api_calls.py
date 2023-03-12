@@ -35,4 +35,6 @@ def set_rtc() -> None:
 
 
 def is_morning() -> bool:
-    return 6 <= int(get_datetime_json()["hour"]) < 11
+    time_tuple = time.localtime(time.time())
+    return 6 <= int(time_tuple[3]) < 11
+
