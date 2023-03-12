@@ -14,7 +14,7 @@ def get_datetime_json() -> dict:
 
 def get_datetime() -> str:
     data = get_datetime_json()
-    return data["dateTime"]
+    return data["dateTime"][0:16]  # Cut off at hour, don't need higher precision
 
 
 def get_time() -> str:

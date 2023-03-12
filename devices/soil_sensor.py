@@ -18,10 +18,7 @@ class SoilSensor:
     MS_TOUCH_BASE = 0x0F
     MS_TOUCH_OFFSET = 0x10
 
-    MIN_RAW_MOISTURE = 700
-    MAX_RAW_MOISTURE = 1015
-
-    def __init__(self, scl_pin: Pin, sda_pin: Pin, dry_threshold, wet_threshold):
+    def __init__(self, scl_pin: Pin, sda_pin: Pin, dry_threshold, wet_threshold, min_moisture, max_moisture):
         """
         Uses machine.Pin parameters to initialize I2C communication with sensor unit
         Dry and wet thresholds should be set to values between 0 and 100
@@ -35,6 +32,8 @@ class SoilSensor:
 
         self.dry_threshold: int = dry_threshold
         self.wet_threshold: int = wet_threshold
+        self.min_moisture = min_moisture
+        self.max_moisture = max_moisture
         self.dry: bool = False
         self.wet: bool = False
 
@@ -70,7 +69,7 @@ class SoilSensor:
         self.moisture_series.append(self.raw_moisture)
 
         mean = sum(self.moisture_series) // len(self.moisture_series)
-        self.moisture = int(100 * (mean - self.MIN_RAW_MOISTURE) / (self.MAX_RAW_MOISTURE - self.MIN_RAW_MOISTURE))
+        self.moisture = int(100 * (mean - self.min_moisture) / (self.max_moisture - self.min_moisture))
 
     def update(self):
         """'

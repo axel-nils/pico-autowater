@@ -8,12 +8,9 @@ import machine
 import time
 
 from devices import *
-from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, get_time, set_rtc, is_morning
-
+from utils import Config, DataFile, WiFi, get_datetime, get_time, set_rtc, is_morning
 
 DATA_FILE = "data/data.json"
-STATIC_IP = "192.168.1.222"
-DRY_THRESHOLD, WET_THRESHOLD = 50, 90
 
 
 class DataServer:
@@ -59,14 +56,14 @@ class DataServer:
 
         print(f"Server got request \"{request}\"")
 
-        if request == "/water_on?":
+        if "/water_on?" in request:
             self.water_on = True
             self.water_off = False
-        elif request == "/water_off?":
+        elif "/water_off?" in request:
             self.water_off = True
             self.water_on = False
-        elif request == "/set_thresholds?":
-            raise NotImplementedError  # TODO: Implement this
+        # elif "/set_thresholds?" in request:
+        # raise NotImplementedError  # TODO: Abandon this and use simple buttons
 
         if request in html_requests:
             print("Server responding with HTML")
@@ -99,14 +96,13 @@ async def update_file():
     Writes last measurement along with timestamp to file
     """
     while True:
+        await asyncio.sleep(900)
         datetime = get_datetime()
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
 
         with open("data/data.json", "r") as file:
             server.pages["json"] = str(file.read())
-
-        await asyncio.sleep(900)
 
 
 async def update_fast():
@@ -118,15 +114,15 @@ async def update_fast():
         REPLACEMENTS["{moisture}"] = sensor.moisture
         REPLACEMENTS["{water_on}"] = valve.is_open
         REPLACEMENTS["{datetime}"] = get_time()
-        REPLACEMENTS["{dry_threshold}"] = DRY_THRESHOLD
-        REPLACEMENTS["{wet_threshold}"] = WET_THRESHOLD
+        REPLACEMENTS["{dry_threshold}"] = c.configs["DRY_LEVEL"]
+        REPLACEMENTS["{wet_threshold}"] = c.configs["WET_LEVEL"]
         REPLACEMENTS["{is_morning}"] = is_morning()
         await asyncio.sleep(10)
 
 
 async def set_leds():
     while True:
-        LED_RED.value(not sensor.wet)
+        LED_RED.value(sensor.dry)
 
         if server.water_on:
             LED_GRN.on()
@@ -145,6 +141,14 @@ async def set_leds():
         await asyncio.sleep(1)
 
 
+def startup_blink():
+    for n in range(3):
+        LED_ONBOARD.off()
+        time.sleep(0.2)
+        LED_ONBOARD.on()
+        time.sleep(0.2)
+
+
 async def task_loop():
     loop = asyncio.get_event_loop()
     asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
@@ -155,23 +159,20 @@ async def task_loop():
 
 
 if __name__ == "__main__":
-    wifi = WiFi(WIFI_NAME, WIFI_PASS, STATIC_IP)
+    c = Config("config.json")
+    wifi = WiFi(c.configs["WIFI_NAME"], c.configs["WIFI_PASS"], c.configs["STATIC_IP"])
     set_rtc()
 
-    sensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
+    sensor = SoilSensor(PIN_SCL, PIN_SDA, c.configs["DRY_LEVEL"], c.configs["WET_LEVEL"],
+                        c.configs["MIN_MOISTURE"], c.configs["MAX_MOISTURE"])
     valve = WaterValve(PIN_VALVE)
     data = DataFile(DATA_FILE)
     server = DataServer(wifi.ip)
 
     REPLACEMENTS = {}
 
-    for n in range(3):
-        LED_ONBOARD.on()
-        time.sleep(0.2)
-        LED_ONBOARD.off()
-        time.sleep(0.2)
-
     try:
+        startup_blink()
         asyncio.run(task_loop())
     finally:
         asyncio.new_event_loop()
