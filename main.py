@@ -12,7 +12,7 @@ from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, get_time, 
 
 
 DATA_FILE = "data/data.json"
-
+STATIC_IP = "192.168.1.222"
 DRY_THRESHOLD, WET_THRESHOLD = 50, 90
 
 
@@ -55,7 +55,7 @@ class DataServer:
 
         header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
         response = self.pages["error"]
-        html_requests = ["/", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
+        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
 
         print(f"Server got request \"{request}\"")
 
@@ -72,15 +72,15 @@ class DataServer:
             print("Server responding with HTML")
             header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.create_html_response(REPLACEMENTS)
-        elif request == "/style.css":
+        elif "style.css" in request:
             print("Server responding with CSS")
             header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["css"]
-        elif request == "/app.js":
+        elif "app.js" in request:
             print("Server responding with JS")
             header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["js"]
-        elif request == "/data/data.json":
+        elif "data.json" in request:
             print("Server responding with JSON")
             header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["json"]
@@ -155,7 +155,7 @@ async def task_loop():
 
 
 if __name__ == "__main__":
-    wifi = WiFi(WIFI_NAME, WIFI_PASS)
+    wifi = WiFi(WIFI_NAME, WIFI_PASS, STATIC_IP)
     set_rtc()
 
     sensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)
