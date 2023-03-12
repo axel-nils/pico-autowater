@@ -12,7 +12,7 @@ from utils import DataFile, WiFi, WIFI_NAME, WIFI_PASS, get_datetime, get_time, 
 
 
 DATA_FILE = "data/data.json"
-
+STATIC_IP = "192.168.1.222"
 DRY_THRESHOLD, WET_THRESHOLD = 50, 90
 
 
@@ -155,7 +155,7 @@ async def task_loop():
 
 
 if __name__ == "__main__":
-    wifi = WiFi(WIFI_NAME, WIFI_PASS)
+    wifi = WiFi(WIFI_NAME, WIFI_PASS, STATIC_IP)
     set_rtc()
 
     sensor = SoilSensor(PIN_SCL, PIN_SDA, DRY_THRESHOLD, WET_THRESHOLD)

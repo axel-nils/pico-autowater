@@ -5,13 +5,17 @@ from time import sleep
 class WiFi:
     MAX_WAIT = 10
 
-    def __init__(self, ssid, psw):
-        self.ip = None
-
+    def __init__(self, ssid, psw, ip=None):
+        """
+        Initialize Wi-Fi connection by passing ssid and password.
+        Use ip param to get specific ip-adress, otherwise ip is assigned by access point.
+        """
+        self.ip = ip
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=0xa11140)  # Disable power saver-mode
-        self.wlan.ifconfig(('192.168.1.222', '255.255.255.0', '192.168.1.1', '192.168.1.1'))
+        if self.ip:
+            self.wlan.ifconfig((self.ip, '255.255.255.0', '192.168.1.1', '192.168.1.1'))
         self.wlan.connect(ssid, psw)
 
         while self.MAX_WAIT > 0:
@@ -33,5 +37,5 @@ if __name__ == "__main__":
     import ubinascii
     wifi = WiFi(WIFI_NAME, WIFI_PASS)
     print(wifi.wlan.ifconfig())
-    mac = ubinascii.hexlify(wifi.wlan.config('mac'),':').decode()
+    mac = ubinascii.hexlify(wifi.wlan.config('mac'), ':').decode()
     print(mac)
