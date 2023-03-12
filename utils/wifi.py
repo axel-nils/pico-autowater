@@ -11,6 +11,7 @@ class WiFi:
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=0xa11140)  # Disable power saver-mode
+        self.wlan.ifconfig(('192.168.1.222', '255.255.255.0', '192.168.1.1', '192.168.1.1'))
         self.wlan.connect(ssid, psw)
 
         while self.MAX_WAIT > 0:
@@ -29,5 +30,8 @@ class WiFi:
 
 if __name__ == "__main__":
     from utils import WIFI_NAME, WIFI_PASS
+    import ubinascii
     wifi = WiFi(WIFI_NAME, WIFI_PASS)
     print(wifi.wlan.ifconfig())
+    mac = ubinascii.hexlify(wifi.wlan.config('mac'),':').decode()
+    print(mac)

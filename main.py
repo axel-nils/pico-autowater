@@ -55,7 +55,7 @@ class DataServer:
 
         header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
         response = self.pages["error"]
-        html_requests = ["/", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
+        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
 
         print(f"Server got request \"{request}\"")
 
@@ -72,15 +72,15 @@ class DataServer:
             print("Server responding with HTML")
             header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.create_html_response(REPLACEMENTS)
-        elif request == "/style.css":
+        elif "style.css" in request:
             print("Server responding with CSS")
             header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["css"]
-        elif request == "/app.js":
+        elif "app.js" in request:
             print("Server responding with JS")
             header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["js"]
-        elif request == "/data/data.json":
+        elif "data.json" in request:
             print("Server responding with JSON")
             header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=60\r\n\r\n"
             response = self.pages["json"]
