@@ -61,6 +61,11 @@ h1 {
   font-size: var(--fs-heading);
 }
 
+h2 {
+  font-family: var(--ff-heading);
+  font-size: var(--fs-body);
+}
+
 .kwarg {
   font-family: var(--ff-special);
   font-size: var(--fs-body);
@@ -89,6 +94,7 @@ button:hover {
 
 #m_chart_div, #t_chart_div {
   min-height: 400px;
+  margin-bottom: 1rem;
 }
 
 div.settings {
@@ -113,17 +119,17 @@ div.settings label {
 
 body {
   display: grid;
-  grid-template-columns: 1em 1fr 1em;
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "header header header"
-    ". main ."
-    ". side ."
-    "footer footer footer";
+    "header"
+    "main"
+    "side"
+    "footer";
 }
 
 @media only screen and (min-width: 860px) {
   body {
-    grid-template-columns: minmax(1em, 1fr) minmax(400px, 900px) minmax(250px, 400px) minmax(1em, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(400px, 900px) minmax(250px, 400px) minmax(0, 1fr);
     grid-template-areas:
       "header header header header"
       ". main side ."

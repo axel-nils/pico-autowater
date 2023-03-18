@@ -95,7 +95,6 @@ async def update_file():
     Writes last measurement along with timestamp to file
     """
     while True:
-        await asyncio.sleep(3600)
         datetime = get_datetime()
         print(datetime, "Data saved to file")
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
@@ -103,6 +102,8 @@ async def update_file():
 
         with open("data/data.json", "r") as file:
             server.pages["json"] = str(file.read())
+
+        await asyncio.sleep(1800)
 
 
 async def update_fast():
