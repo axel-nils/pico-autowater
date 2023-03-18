@@ -87,7 +87,7 @@ class SoilSensor:
         return self.moisture, self.temp
 
     def __str__(self):
-        return f"moisture: {self.moisture}%, temperature reading: {self.temp} °C."
+        return f"moisture: {self.moisture}%, temperature: {self.temp} °C."
 
 
 if __name__ == "__main__":

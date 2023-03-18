@@ -50,11 +50,7 @@ class DataServer:
         except IndexError:
             pass
 
-        header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
-        response = self.pages["error"]
-        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
-
-        print(f"Server got request \"{request}\"")
+        print(get_datetime(), "Server got request:", request)
 
         if "/water_on?" in request:
             self.water_on = True
@@ -62,25 +58,24 @@ class DataServer:
         elif "/water_off?" in request:
             self.water_off = True
             self.water_on = False
-        # elif "/set_thresholds?" in request:
-        # raise NotImplementedError  # TODO: Abandon this and use simple buttons
+
+        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
 
         if request in html_requests:
-            print("Server responding with HTML")
-            header = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nCache-Control: max-age=60\r\n\r\n"
+            header = self.create_standard_header("text/html")
             response = self.create_html_response(REPLACEMENTS)
         elif "style.css" in request:
-            print("Server responding with CSS")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\nCache-Control: max-age=60\r\n\r\n"
+            header = self.create_standard_header("text/css")
             response = self.pages["css"]
         elif "app.js" in request:
-            print("Server responding with JS")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\nCache-Control: max-age=60\r\n\r\n"
+            header = self.create_standard_header("application/javascript")
             response = self.pages["js"]
         elif "data.json" in request:
-            print("Server responding with JSON")
-            header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: max-age=60\r\n\r\n"
+            header = self.create_standard_header("application/json")
             response = self.pages["json"]
+        else:
+            header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
+            response = self.pages["error"]
 
         return header, response
 
@@ -90,14 +85,19 @@ class DataServer:
             response = response.replace(r, str(replacements[r]))
         return response
 
+    @staticmethod
+    def create_standard_header(content_type):
+        return f"HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\nCache-Control: max-age=60\r\n\r\n"
+
 
 async def update_file():
     """
     Writes last measurement along with timestamp to file
     """
     while True:
-        await asyncio.sleep(900)
+        await asyncio.sleep(3600)
         datetime = get_datetime()
+        print(datetime, "Data saved to file")
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
 

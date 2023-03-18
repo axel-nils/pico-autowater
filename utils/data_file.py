@@ -32,13 +32,12 @@ class DataFile:
         return json_object
 
     def append_entry(self, entry: Entry) -> None:
-        data: list = self.data()
-        data.append([value for value in entry])
+        self.data.append([value for value in entry])
+        while len(self.data) > 168:
+            self.data.pop(0)
         self.save_json()
 
-    def entries(self) -> int:
-        return len(self.data())
-
+    @property
     def data(self):
         return self.json["data"]
 

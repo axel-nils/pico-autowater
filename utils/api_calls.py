@@ -13,8 +13,13 @@ def get_datetime_json() -> dict:
 
 
 def get_datetime() -> str:
-    data = get_datetime_json()
-    return data["dateTime"][0:16]  # Cut off at hour, don't need higher precision
+    """
+    Returns formatted datetime string with minute precision
+    """
+    dtt = time.localtime()
+    date_str = f"{dtt[0]}-{dtt[1]:02d}-{dtt[2]:02d}"
+    time_str = f"{dtt[3]:02d}:{dtt[4]:02d}"
+    return f"{date_str}T{time_str}"
 
 
 def get_time() -> str:
@@ -32,6 +37,7 @@ def set_rtc() -> None:
     dt = get_datetime_json()
     dtt = dt["year"], dt["month"], dt["day"], dt["dayOfWeek"], dt["hour"], dt["minute"], dt["seconds"], 0
     rtc.datetime(dtt)
+    print("RTC set to", get_datetime())
 
 
 def is_morning() -> bool:
