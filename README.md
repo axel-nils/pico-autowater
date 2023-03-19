@@ -8,14 +8,12 @@ The Pico hosts a website to show current status and statistics as well as allow 
 ## Hardware used
 * Raspberry Pi Pico W
 * Adafruit STEMMA Soil Sensor (capacitive, based on ATSAMD10 chip)
-* Relay
-* Solenoid Valve (3/4", NC, 12 V)
+* Relay module (3.3 V, with protective diode)
+* Solenoid Valve (12 V, 3/4", NC)
 * Water pipe (3/4")
 * Breadboard
 * LEDs
 * Cables and power supply
 ## Todo
-* Fix server performance by preventing caching and compressing files with gzip
 * Images and schematics showing the system
-* Automated watering based on time as well as moisture
 * More advanced data analysis
