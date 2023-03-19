@@ -20,7 +20,8 @@ class DataServer:
         self.host = "0.0.0.0"
 
         self.files = {"html": "web/index.html", "error": "web/notfound.html",
-                      "css": "web/style.css", "js": "web/app.js", "json": "data/data.json"}
+                      "css": "web/style.css", "js": "web/app.js", "json": "data/data.json",
+                      "png": "web/icon.png"}
         self.pages = self.preload_pages()
         self.water_on = False
         self.water_off = False
@@ -28,8 +29,12 @@ class DataServer:
     def preload_pages(self):
         pages = {}
         for name, file_name in self.files.items():
-            with open(file_name, "r") as file:
-                pages[name] = str(file.read())
+            if name == "png":
+                with open(file_name, "rb") as f:
+                    pages[name] = f.read()
+            else:
+                with open(file_name, "r") as f:
+                    pages[name] = str(f.read())
         return pages
 
     async def serve(self, reader, writer):
@@ -73,6 +78,9 @@ class DataServer:
         elif "data.json" in request:
             header = self.create_standard_header("application/json")
             response = self.pages["json"]
+        elif "icon.png" in request:
+            header = self.create_standard_header("image/png")
+            response = self.pages["png"]
         else:
             header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
             response = self.pages["error"]
