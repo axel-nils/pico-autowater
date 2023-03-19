@@ -1,24 +1,42 @@
-google.charts.load('current', {
-  packages: ['corechart', 'line']
-});
-google.charts.setOnLoadCallback(drawCharts);
+google.charts.load('current', {packages: ['corechart'], 'language': 'sv'}).then(drawCharts);
 
 const em = parseInt(window.getComputedStyle(document.getElementById('download_btn')).fontSize);
+const color = '#243B10';
+const white = '#F8F8F8';
 
 const chartOptions = {
-  backgroundColor: '#F0F0F0',
-  colors: ['#243B10', '#3B1210'],
-  fontName: 'Raleway',
+  backgroundColor: color,
+  colors: [white],
   fontSize: em,
+  fontName: 'Raleway',
   legend: 'none',
   theme: 'maximized',
+  vAxis: {
+    gridlines: {
+      count: 0
+    },
+    textStyle: {
+      color: white,
+    },
+  },
+  hAxis: {
+    format: 'EEEE',
+    gridlines: {
+      count: 7,
+      color: white
+    },
+    minorGridlines: {
+      count: 0
+    },
+    textStyle: {
+      color: white,
+    },
+  }
 };
 
-async function getJson(filePath) {
+async function getJsonData(filePath) {
   const response = await fetch(filePath);
   const json = await response.json();
-  console.log(json)
-  console.log(json.data)
   return json.data;
 }
 
@@ -45,8 +63,7 @@ function getDataTable(data_array, colNr, type, name) {
 }
 
 async function drawCharts() {
-  const data_array = await getJson('data/data.json');
-  console.log(data_array)
+  const data_array = await getJsonData('data.json');
 
   const m_chart = getLineChart('m_chart_div');
   const m_data = getDataTable(data_array, 1, 'number', 'Jordfuktighet');
