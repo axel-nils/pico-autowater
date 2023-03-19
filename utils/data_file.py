@@ -33,7 +33,7 @@ class DataFile:
 
     def append_entry(self, entry: Entry) -> None:
         self.data.append([value for value in entry])
-        while len(self.data) > 168:
+        while len(self.data) > 336:
             self.data.pop(0)
         self.save_json()
 

@@ -185,4 +185,3 @@ if __name__ == "__main__":
         asyncio.run(task_loop())
     finally:
         asyncio.new_event_loop()
-        machine.reset()
