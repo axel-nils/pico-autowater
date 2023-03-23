@@ -1,43 +1,43 @@
 google.charts.load('current', {packages: ['corechart'], 'language': 'sv'}).then(drawCharts);
+window.onload = (event) => {
+  getWeatherJson(weatherUrl)
+};
 
 const em = parseInt(window.getComputedStyle(document.getElementById('download_btn')).fontSize);
 const color = '#243B10';
 const white = '#F8F8F8';
+const weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?id=6943587&units=metric&lang=se&appid=87d1bfdb974592195531cdf4aae52fd2';
 
 const chartOptions = {
+  chartArea: {width: '100%', top: 0, bottom: 2*em},
   backgroundColor: color,
   colors: [white],
   fontSize: em,
   fontName: 'Raleway',
-  legend: 'none',
-  theme: 'maximized',
   vAxis: {
-    gridlines: {
-      count: 0
-    },
-    textStyle: {
-      color: white,
-    },
+    gridlines: {count: 0},
+    textStyle: {color: white},
+    textPosition: 'in'
   },
   hAxis: {
-    format: 'EEEE',
-    gridlines: {
-      count: 7,
-      color: white
-    },
-    minorGridlines: {
-      count: 0
-    },
-    textStyle: {
-      color: white,
-    },
+    format: 'EEE',
+    gridlines: {color: white, count: 6},
+    textStyle: {color: white},
   }
 };
 
-async function getJsonData(filePath) {
+async function getWeatherJson(url) {
+  const response = await fetch(url);
+  const json = await response.json();
+  const desc = json.weather[0].description;
+  const temp = parseInt(json.main.temp);
+  document.getElementById("weather").innerHTML = temp + ' °C och ' + desc;
+}
+
+async function getDataJson(filePath) {
   const response = await fetch(filePath);
   const json = await response.json();
-  return json.data;
+  return json;
 }
 
 function getLineChart(chartId) {
@@ -63,7 +63,8 @@ function getDataTable(data_array, colNr, type, name) {
 }
 
 async function drawCharts() {
-  const data_array = await getJsonData('data.json');
+  const data_json = await getDataJson('data.json')
+  const data_array = data_json.data;
 
   const m_chart = getLineChart('m_chart_div');
   const m_data = getDataTable(data_array, 1, 'number', 'Jordfuktighet');
