@@ -60,11 +60,15 @@ class DataServer:
 
         print(get_datetime(), "Server got request:", request)
 
-        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?"]
+        html_requests = ["/", "//", "/index.html"]
+        posts = ["/water_on", "/water_off"]
 
         if request in html_requests:
             header = self.create_standard_header("text/html")
             response = self.create_html_response()
+        elif request in posts:
+            header = "HTTP/1.1 204 No content\r\n\r\n"
+            response = ""
         elif "style.css" in request:
             header = self.create_standard_header("text/css")
             response = self.pages["css"]
@@ -81,10 +85,10 @@ class DataServer:
             header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
             response = self.pages["error"]
 
-        if "/water_on?" in request:
+        if "/water_on" in request:
             self.water_on = True
             self.water_off = False
-        elif "/water_off?" in request:
+        elif "/water_off" in request:
             self.water_off = True
             self.water_on = False
 
