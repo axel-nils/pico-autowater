@@ -4,7 +4,6 @@ Main program that automatically runs when Pico is powered
 
 import uasyncio as asyncio
 
-import machine
 import time
 
 from devices import *
@@ -23,10 +22,11 @@ class DataServer:
                       "css": "web/style.css", "js": "web/app.js", "json": "data/data.json",
                       "png": "web/icon.png"}
         self.pages = self.preload_pages()
+        self.replacements = dict()
         self.water_on = False
         self.water_off = False
 
-    def preload_pages(self):
+    def preload_pages(self) -> dict:
         pages = {}
         for name, file_name in self.files.items():
             if name == "png":
@@ -36,6 +36,9 @@ class DataServer:
                 with open(file_name, "r") as f:
                     pages[name] = str(f.read())
         return pages
+
+    async def run_server(self):
+        await asyncio.start_server(self.serve, self.host, self.port)
 
     async def serve(self, reader, writer):
         request_line = await reader.readline()
@@ -57,18 +60,11 @@ class DataServer:
 
         print(get_datetime(), "Server got request:", request)
 
-        if "/water_on?" in request:
-            self.water_on = True
-            self.water_off = False
-        elif "/water_off?" in request:
-            self.water_off = True
-            self.water_on = False
-
-        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?", "/set_thresholds?"]
+        html_requests = ["/", "//", "/index.html", "/water_on?", "/water_off?"]
 
         if request in html_requests:
             header = self.create_standard_header("text/html")
-            response = self.create_html_response(REPLACEMENTS)
+            response = self.create_html_response()
         elif "style.css" in request:
             header = self.create_standard_header("text/css")
             response = self.pages["css"]
@@ -85,12 +81,19 @@ class DataServer:
             header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
             response = self.pages["error"]
 
+        if "/water_on?" in request:
+            self.water_on = True
+            self.water_off = False
+        elif "/water_off?" in request:
+            self.water_off = True
+            self.water_on = False
+
         return header, response
 
-    def create_html_response(self, replacements):
+    def create_html_response(self):
         response = self.pages["html"]
-        for r in replacements:
-            response = response.replace(r, str(replacements[r]))
+        for r in self.replacements:
+            response = response.replace(r, str(self.replacements[r]))
         return response
 
     @staticmethod
@@ -114,18 +117,23 @@ async def update_file():
         await asyncio.sleep(1800)
 
 
+def get_replacements_values():
+    replacements = dict()
+    replacements["{temperature}"] = sensor.temp
+    replacements["{moisture}"] = sensor.moisture
+    replacements["{water_on}"] = valve.is_open
+    replacements["{datetime}"] = get_time()
+    replacements["{dry_threshold}"] = c.dry_level
+    replacements["{wet_threshold}"] = c.wet_level
+    replacements["{is_morning}"] = is_morning()
+    return replacements
+
+
 async def update_fast():
     while True:
         sensor.update()
         valve.open() if LED_GRN.value() else valve.close()
-
-        REPLACEMENTS["{temperature}"] = sensor.temp
-        REPLACEMENTS["{moisture}"] = sensor.moisture
-        REPLACEMENTS["{water_on}"] = valve.is_open
-        REPLACEMENTS["{datetime}"] = get_time()
-        REPLACEMENTS["{dry_threshold}"] = c.configs["DRY_LEVEL"]
-        REPLACEMENTS["{wet_threshold}"] = c.configs["WET_LEVEL"]
-        REPLACEMENTS["{is_morning}"] = is_morning()
+        server.replacements = get_replacements_values()
         await asyncio.sleep(10)
 
 
@@ -160,7 +168,7 @@ def startup_blink():
 
 async def task_loop():
     loop = asyncio.get_event_loop()
-    asyncio.create_task(asyncio.start_server(server.serve, server.host, server.port))
+    asyncio.create_task(server.run_server())
     asyncio.create_task(set_leds())
     asyncio.create_task(update_fast())
     asyncio.create_task(update_file())
@@ -169,11 +177,10 @@ async def task_loop():
 
 if __name__ == "__main__":
     c = Config("config.json")
-    wifi = WiFi(c.configs["WIFI_NAME"], c.configs["WIFI_PASS"], c.configs["STATIC_IP"])
+    wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
     set_rtc()
 
-    sensor = SoilSensor(PIN_SCL, PIN_SDA, c.configs["DRY_LEVEL"], c.configs["WET_LEVEL"],
-                        c.configs["MIN_MOISTURE"], c.configs["MAX_MOISTURE"])
+    sensor = SoilSensor(PIN_SCL, PIN_SDA, c.dry_level, c.wet_level, c.min_moisture, c.max_moisture)
     valve = WaterValve(PIN_VALVE)
     data = DataFile(DATA_FILE)
     server = DataServer(wifi.ip)
@@ -185,3 +192,4 @@ if __name__ == "__main__":
         asyncio.run(task_loop())
     finally:
         asyncio.new_event_loop()
+        LED_ONBOARD.off()

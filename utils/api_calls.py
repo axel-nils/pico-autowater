@@ -24,7 +24,7 @@ def get_datetime() -> str:
 
 def get_time() -> str:
     time_tuple = time.localtime(time.time())
-    return f"{time_tuple[3]}:{time_tuple[4]}:{time_tuple[5]}"
+    return f"{time_tuple[3]:02d}:{time_tuple[4]:02d}:{time_tuple[5]:02d}"
 
 
 def get_date() -> str:

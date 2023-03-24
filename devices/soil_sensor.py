@@ -94,16 +94,15 @@ if __name__ == "__main__":
     """
     Run this. Set min and max moisture constants to match totally dry and wet soil.
     """
-    scl = Pin(22, Pin.IN)
-    sda = Pin(21, Pin.IN)
-    i2c = I2C(0, scl=scl, sda=sda)
+    from pin_config import PIN_SCL, PIN_SDA
+    i2c = I2C(0, scl=PIN_SCL, sda=PIN_SDA)
 
     devices = i2c.scan()
     if devices:
         for device in devices:
             print(hex(device))
 
-    sensor = SoilSensor(scl, sda, 100, 500)
+    sensor = SoilSensor(PIN_SCL, PIN_SDA, 100, 500, 0, 1000)
     while True:
         sensor.update()
         print(sensor.raw_moisture, sensor.temp)
