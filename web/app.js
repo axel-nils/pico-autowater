@@ -56,7 +56,7 @@ function getDataTable(data_array, colNr, type, name) {
   }
   dt.addRows(arr);
 
-  const fmt_d = new google.visualization.DateFormat({pattern: 'EEEE d MMM HH:mm:ss'});
+  const fmt_d = new google.visualization.DateFormat({pattern: 'EEEE d MMM HH:mm'});
   fmt_d.format(dt, 0);
 
   return dt
