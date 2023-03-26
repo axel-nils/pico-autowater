@@ -12,7 +12,7 @@ def get_datetime_json() -> dict:
     return data
 
 
-def get_datetime() -> str:
+def get_datetime_str() -> str:
     """
     Returns formatted datetime string with minute precision
     """
@@ -22,9 +22,13 @@ def get_datetime() -> str:
     return f"{date_str}T{time_str}"
 
 
-def get_time() -> str:
-    time_tuple = time.localtime(time.time())
+def get_time_str() -> str:
+    time_tuple = time.localtime()
     return f"{time_tuple[3]:02d}:{time_tuple[4]:02d}:{time_tuple[5]:02d}"
+
+
+def get_time() -> tuple:
+    return time.localtime()[3:6]
 
 
 def get_date() -> str:
@@ -37,10 +41,10 @@ def set_rtc() -> None:
     dt = get_datetime_json()
     dtt = dt["year"], dt["month"], dt["day"], dt["dayOfWeek"], dt["hour"], dt["minute"], dt["seconds"], 0
     rtc.datetime(dtt)
-    print("RTC set to", get_datetime())
+    print("RTC set to", get_datetime_str())
 
 
 def is_morning() -> bool:
-    time_tuple = time.localtime(time.time())
+    time_tuple = time.localtime()
     return 6 <= int(time_tuple[3]) < 11
 

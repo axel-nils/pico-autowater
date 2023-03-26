@@ -26,14 +26,14 @@ class DataFile:
         try:
             with open(self.filename, "r") as f:
                 json_object = json.load(f)
-        except:
+        except OSError as e:
             json_object = DataFile.template_json
-            print(f"Failed reading {self.filename}")
+            print(e)
         return json_object
 
     def append_entry(self, entry: Entry) -> None:
         self.data.append([value for value in entry])
-        while len(self.data) > 336:
+        while len(self.data) > 168:
             self.data.pop(0)
         self.save_json()
 

@@ -1,5 +1,5 @@
 import uasyncio as asyncio
-from utils.api_calls import get_datetime
+from utils.api_calls import get_datetime_str
 
 
 class DataServer:
@@ -9,10 +9,10 @@ class DataServer:
         self.host = "0.0.0.0"
 
         self.files = {"html": "web/index.html", "error": "web/notfound.html",
-                      "css": "web/style.css", "js": "web/app.js", "json": "data/data.json",
+                      "css": "web/style.css", "js": "web/app.js", "json": "data.json",
                       "png": "web/icon.png"}
         self.pages = self.preload_pages()
-        self.replacements = dict()
+        self.system_status = dict()
         self.water_on = False
         self.water_off = False
 
@@ -31,15 +31,18 @@ class DataServer:
         await asyncio.start_server(self.serve, self.host, self.port)
 
     async def serve(self, reader, writer):
-        request_line = await reader.readline()
-        while await reader.readline() != b"\r\n":
-            pass
+        try:
+            request_line = await reader.readline()
+            while await reader.readline() != b"\r\n":
+                pass
 
-        header, response = self.handle_request(request_line)
-        writer.write(header)
-        writer.write(response)
-        await writer.drain()
-        await writer.wait_closed()
+            header, response = self.handle_request(request_line)
+            writer.write(header)
+            writer.write(response)
+            await writer.drain()
+            await writer.wait_closed()
+        except OSError as e:
+            print(e)
 
     def handle_request(self, request_line):
         request = str(request_line)
@@ -48,28 +51,28 @@ class DataServer:
         except IndexError:
             pass
 
-        print(get_datetime(), "Server got request:", request)
+        print(get_datetime_str(), "Server got request:", request)
 
         html_requests = ["/", "//", "/index.html"]
         posts = ["/water_on", "/water_off"]
 
         if request in html_requests:
-            header = self.create_standard_header("text/html")
+            header = self.ok_header("text/html", 60)
             response = self.create_html_response()
         elif request in posts:
             header = "HTTP/1.1 204 No content\r\n\r\n"
             response = ""
         elif "style.css" in request:
-            header = self.create_standard_header("text/css")
+            header = self.ok_header("text/css", 86400)
             response = self.pages["css"]
         elif "app.js" in request:
-            header = self.create_standard_header("application/javascript")
+            header = self.ok_header("application/javascript", 86400)
             response = self.pages["js"]
         elif "data.json" in request:
-            header = self.create_standard_header("application/json")
+            header = self.ok_header("application/json", 600)
             response = self.pages["json"]
         elif "icon.png" in request:
-            header = self.create_standard_header("image/png")
+            header = self.ok_header("image/png", 86400)
             response = self.pages["png"]
         else:
             header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
@@ -86,10 +89,10 @@ class DataServer:
 
     def create_html_response(self):
         response = self.pages["html"]
-        for r in self.replacements:
-            response = response.replace(r, str(self.replacements[r]))
+        for r in self.system_status:
+            response = response.replace(r, str(self.system_status[r]))
         return response
 
     @staticmethod
-    def create_standard_header(content_type):
-        return f"HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\nCache-Control: max-age=60\r\n\r\n"
+    def ok_header(content_type, max_age):
+        return f"HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\nCache-Control: max-age={max_age}\r\n\r\n"

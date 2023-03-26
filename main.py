@@ -3,29 +3,34 @@ Main program that automatically runs when Pico is powered
 """
 
 import uasyncio as asyncio
-
 import time
+import gc
 
 from devices import *
-from utils import Config, DataServer, DataFile, WiFi, get_datetime, get_time, set_rtc, is_morning
+from utils import Config, DataServer, DataFile, WiFi, set_rtc, get_datetime_str, get_time_str, get_time, is_morning
 
-DATA_FILE = "data/data.json"
+DATA_FILE = "data.json"
+CONFIG_FILE = "config.json"
 
 
 async def update_file():
     """
     Writes last measurement along with timestamp to file
     """
+    delay = 60 * (60 - get_time()[1])
+    print("Next save in ", delay // 60, "min")
+    await asyncio.sleep(delay)
     while True:
-        datetime = get_datetime()
-        print(datetime, "Data saved to file")
+        datetime = get_datetime_str()
+        print(datetime, "Saving data")
+        gc.collect()
+        gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+
         entry = data.Entry(datetime, sensor.moisture, sensor.temp)
         data.append_entry(entry)
-
-        with open("data/data.json", "r") as file:
+        with open(DATA_FILE, "r") as file:
             server.pages["json"] = str(file.read())
-
-        await asyncio.sleep(1800)
+        await asyncio.sleep(3600)
 
 
 def get_replacements_values():
@@ -33,7 +38,7 @@ def get_replacements_values():
     replacements["{temperature}"] = sensor.temp
     replacements["{moisture}"] = sensor.moisture
     replacements["{water_on}"] = valve.is_open
-    replacements["{datetime}"] = get_time()
+    replacements["{datetime}"] = get_time_str()
     replacements["{dry_threshold}"] = c.dry_level
     replacements["{wet_threshold}"] = c.wet_level
     replacements["{is_morning}"] = is_morning()
@@ -44,7 +49,7 @@ async def update_fast():
     while True:
         sensor.update()
         valve.open() if LED_GRN.value() else valve.close()
-        server.replacements = get_replacements_values()
+        server.system_status = get_replacements_values()
         await asyncio.sleep(10)
 
 
@@ -87,13 +92,14 @@ async def task_loop():
 
 
 if __name__ == "__main__":
-    c = Config("config.json")
-    wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
-    set_rtc()
+    c = Config(CONFIG_FILE)
+    data = DataFile(DATA_FILE)
 
     sensor = SoilSensor(PIN_SCL, PIN_SDA, c.dry_level, c.wet_level, c.min_moisture, c.max_moisture)
     valve = WaterValve(PIN_VALVE)
-    data = DataFile(DATA_FILE)
+
+    wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
+    set_rtc()
     server = DataServer(wifi.ip)
 
     try:
