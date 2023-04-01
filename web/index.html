@@ -2,8 +2,8 @@
 <html lang="sv">
 
   <head>
-    <link href='https://fonts.googleapis.com/css?family=Marcellus|Marcellus+SC|Raleway' rel='stylesheet'>
-    <link href='style.css' rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Marcellus|Marcellus+SC|Raleway" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,15 +17,13 @@
       <h1>Status</h1>
       <p>
         Vid senaste mätningen (<span class="kwarg">{datetime}</span>)
-        var jordfuktigheten <span class="kwarg">{moisture}</span>%
+        var jordfuktigheten <span id="moisture_string" class="kwarg">{moisture}</span>%
         och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C i växthuset.
         Utomhus är det <span id="weather">inget väder alls :(</span>.
       </p>
       <h1>Historik</h1>
       <script src="app.js" defer></script>
-      <h2>Jordfuktighet [%]</h2>
       <div id="m_chart_div"></div>
-      <h2>Lufttemperatur [&deg;C]</h2>
       <div id="t_chart_div"></div>
       <a class="wrapper" href="/data/data.json" style="text-decoration: none" download>
         <button id="download_btn" class="green" type="submit"> Ladda ner data </button>
@@ -35,18 +33,18 @@
     <div class="side">
       <h1>Bevattning</h1>
       <div>
+        <div id="gauge_div"></div>
         <p>
           Automatisk bevattning går igång på morgonen (morgon just nu = <span class="kwarg">{is_morning}</span>)
-          om fuktigheten är under <span class="kwarg">{wet_threshold}</span>%
-          eller när som helst om fuktigheten är under <span class="kwarg">{dry_threshold}</span>%.
+          om fuktigheten är under <span id="wet_string" class="kwarg">{wet_threshold}</span>%
+          eller när som helst om fuktigheten är under <span id="dry_string" class="kwarg">{dry_threshold}</span>%.
         </p>
         <p>
           Bevattningen är för närvarande <span class="kwarg">{water_on}</span>.
           Om du slår på den manuellt kommer den vara på tills fuktigheten är över den övre gränsen.
         </p>
         <form class="wrapper">
-          <button class="green" type="submit" formmethod="post" formaction="./water_on"> ON </button>
-          <button class="red" type="submit" formmethod="post" formaction="./water_off"> OFF </button>
+          <button id="on_btn" class="green" type="submit" formmethod="post" formaction="./water_on"> ON </button>
         </form>
       </div>
     </div>
