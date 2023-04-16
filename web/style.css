@@ -2,8 +2,8 @@
   --ff-special: "Marcellus SC", "Optima", serif;
   --ff-heading: "Marcellus", "Optima", serif;
   --ff-body: "Raleway", sans-serif;
-  --fs-heading: 2rem;
-  --fs-body: 1.25rem;
+  --fs-heading: 1.75rem;
+  --fs-body: 1rem;
   --clr-bg1: #F8F8F8;
   --clr-bg2: #F0F0F0;
   --clr-bg3: #E8E8E8;
@@ -13,7 +13,6 @@
   --clr-cyan: #10393B;
   --clr-purple: #27103B;
   --clr-yellow: #3B3B10;
-
 }
 
 body {
@@ -68,7 +67,6 @@ h2 {
 
 .kwarg {
   font-family: var(--ff-special);
-  font-size: var(--fs-body);
 }
 
 .red {
@@ -86,25 +84,11 @@ button {
   color: var(--clr-bg1);
   border: none;
   cursor: pointer;
+  border-radius: var(--fs-body);
 }
 
 button:hover {
   opacity: 0.8;
-}
-
-#m_chart_div, #t_chart_div {
-  min-height: 400px;
-  margin-bottom: 1rem;
-}
-
-div.settings {
-  display: grid;
-  grid-template-columns: 50% auto;
-  gap: 1em;
-}
-
-div.settings label {
-  text-align: right;
 }
 
 .wrapper {
@@ -129,6 +113,8 @@ body {
 
 @media only screen and (min-width: 860px) {
   body {
+    --fs-body: 1.25rem;
+    --fs-heading: 2rem;
     grid-template-columns: minmax(0, 1fr) minmax(400px, 900px) minmax(250px, 400px) minmax(0, 1fr);
     grid-template-areas:
       "header header header header"
