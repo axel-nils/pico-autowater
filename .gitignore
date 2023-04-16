@@ -2,4 +2,3 @@
 .idea
 *.json
 *.pyc
-my_credentials.py

@@ -7,9 +7,9 @@ from collections import namedtuple
 
 
 class DataFile:
-    Entry = namedtuple("Entry", ["datetime", "moisture", "temperature"])
+    Entry = namedtuple("Entry", ["datetime", "moisture", "temperature", "watering"])
     template_json = {
-        "data_columns": ["datetime", "moisture", "temperature"],
+        "data_columns": ["datetime", "moisture", "temperature", "watering"],
         "data": []
     }
 

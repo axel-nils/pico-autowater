@@ -54,7 +54,7 @@ class DataServer:
         print(get_datetime_str(), "Server got request:", request)
 
         html_requests = ["/", "//", "/index.html"]
-        posts = ["/water_on", "/water_off"]
+        posts = ["/water_on"]
 
         if request in html_requests:
             header = self.ok_header("text/html", 60)
@@ -81,9 +81,6 @@ class DataServer:
         if "/water_on" in request:
             self.water_on = True
             self.water_off = False
-        elif "/water_off" in request:
-            self.water_off = True
-            self.water_on = False
 
         return header, response
 

@@ -1,5 +1,6 @@
 import network
-from time import sleep
+import urequests as requests
+import time
 
 
 class WiFi:
@@ -15,27 +16,51 @@ class WiFi:
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=0xa11140)  # Disable power saver-mode
-        
-        if not self.wlan.isconnected():
-            self.attempt_connection()
-        
-        self.ip = self.wlan.ifconfig()[0]
-        print(f"Connected to {ssid} with IP-address {self.ip}")
+
+        self.attempt_connection()
+        print(f"Connected to {self.ssid} with IP-adress {self.ip}")
 
     def attempt_connection(self):
         if self.ip:
             self.wlan.ifconfig((self.ip, '255.255.255.0', '192.168.1.1', '192.168.1.1'))
         
-        self.wlan.connect(self.ssid, self.psw)
-        
-        while not self.wlan.isconnected():
-            print("Waiting for connection...")
-            sleep(1)
+        if not self.wlan.isconnected():
+            self.wlan.connect(self.ssid, self.psw)
+            while not self.wlan.isconnected():
+                print("Waiting for connection...")
+                time.sleep(3)
+                self.wlan.connect(self.ssid, self.psw)
+        self.ip = self.wlan.ifconfig()[0]
+
+    def test_connection(self):
+        """Returns true if able to connect to url on the internet"""
+        if not self.wlan.isconnected():
+            return False
+        url = "https://httpbin.org/ip"
+        try:
+            r = requests.get(url)
+            r.close()
+        except OSError as e:
+            print(e)
+            return False
+        else:
+            return True
+
+
+def main():
+    while True:
+        if wifi.test_connection():
+            print("connection ok")
+        else:
+            print("connection not ok")
+            wifi.attempt_connection()
+        time.sleep(10)
 
 
 if __name__ == "__main__":
     import ubinascii
-    wifi = WiFi("mywifiname", "mywifipass")
+    wifi = WiFi("wifiname", "wifipass")
     print(wifi.wlan.ifconfig())
     mac = ubinascii.hexlify(wifi.wlan.config('mac'), ':').decode()
     print(mac)
+    main()
