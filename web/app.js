@@ -41,6 +41,7 @@ async function chartIt() {
   Chart.defaults.font.size = em;
   Chart.defaults.font.family = "Raleway, consolas";
   Chart.defaults.color = "#101010";
+  Chart.defaults.plugins.legend.display = false;
   const ms = rawData.data.map(d => Object({
     x: d[0],
     y: d[1]
