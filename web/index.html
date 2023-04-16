@@ -6,6 +6,7 @@
     <link href="style.css" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
     <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <title>Nilssons Växthus</title>
@@ -19,13 +20,14 @@
         Vid senaste mätningen (<span class="kwarg">{datetime}</span>)
         var jordfuktigheten <span id="moisture_string" class="kwarg">{moisture}</span>%
         och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C i växthuset.
-        Utomhus är det <span id="weather">inget väder alls :(</span>.
+        <span id="weather" class="kwarg">{weather}</span>.
       </p>
       <h1>Historik</h1>
       <script src="app.js" defer></script>
-      <div id="m_chart_div"></div>
-      <div id="t_chart_div"></div>
-      <a class="wrapper" href="/data/data.json" style="text-decoration: none" download>
+      <div>
+        <canvas id="myChart" ></canvas>
+      </div>
+      <a class="wrapper" href="/data.json" style="text-decoration: none" download>
         <button id="download_btn" class="green" type="submit"> Ladda ner data </button>
       </a>
 
@@ -35,9 +37,9 @@
       <div>
         <div id="gauge_div"></div>
         <p>
-          Automatisk bevattning går igång på morgonen (morgon just nu = <span class="kwarg">{is_morning}</span>)
-          om fuktigheten är under <span id="wet_string" class="kwarg">{wet_threshold}</span>%
-          eller när som helst om fuktigheten är under <span id="dry_string" class="kwarg">{dry_threshold}</span>%.
+          Automatisk bevattning går igång på morgonen om fuktigheten är under
+          <span id="wet_string" class="kwarg">{wet_threshold}</span>% eller när som helst om fuktigheten är under
+          <span id="dry_string" class="kwarg">{dry_threshold}</span>%.
         </p>
         <p>
           Bevattningen är för närvarande <span class="kwarg">{water_on}</span>.
