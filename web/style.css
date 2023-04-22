@@ -85,6 +85,7 @@ button {
   border: none;
   cursor: pointer;
   border-radius: var(--fs-body);
+  margin: var(--fs-body);
 }
 
 button:hover {

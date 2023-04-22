@@ -53,7 +53,7 @@ class DataServer:
         print("Server got request:", request)
 
         html_requests = ["/", "//", "/index.html"]
-        posts = ["/water_on"]
+        posts = ["/water_on", "/water_off"]
 
         if request in html_requests:
             header = self.ok_header("text/html", 60)
