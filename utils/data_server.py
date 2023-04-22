@@ -1,5 +1,4 @@
 import uasyncio as asyncio
-from utils.api_calls import get_datetime_str
 
 
 class DataServer:
@@ -51,7 +50,7 @@ class DataServer:
         except IndexError:
             pass
 
-        print(get_datetime_str(), "Server got request:", request)
+        print("Server got request:", request)
 
         html_requests = ["/", "//", "/index.html"]
         posts = ["/water_on"]

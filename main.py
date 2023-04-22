@@ -3,9 +3,7 @@ Main program that automatically runs when Pico is powered
 """
 
 import uasyncio as asyncio
-import time
 import gc
-import machine
 
 from devices import *
 from utils import *
@@ -21,9 +19,9 @@ async def hourly_data_collection():
     Writes last measurement along with timestamp to file
     """
     while True:
-        delay = 60 * (60 - get_time()[1])
+        delay = 60 * (60 - tu.minute)
         await asyncio.sleep(delay)
-        datetime = get_datetime_str()
+        datetime = tu.datetime_str()
         entry = data.Entry(datetime, sensor.moisture, sensor.temp, valve.is_open)
         data.append_entry(entry)
         with open(DATA_FILE, "r") as file:
@@ -35,7 +33,7 @@ def get_replacements_values():
     replacements["{temperature}"] = sensor.temp
     replacements["{moisture}"] = sensor.moisture
     replacements["{water_on}"] = valve.is_open
-    replacements["{datetime}"] = get_time_str()
+    replacements["{datetime}"] = tu.datetime_str()
     replacements["{dry_threshold}"] = c.dry_level
     replacements["{wet_threshold}"] = c.wet_level
     return replacements
@@ -51,9 +49,9 @@ async def read_sensor():
 
 async def keep_connection():
     while True:
-        replacements["{weather}"] = get_weather_str()
         if not wifi.test_connection():
             wifi.attempt_connection()
+        replacements["{weather}"] = WeatherApi().get()
         await asyncio.sleep(600)
 
 
@@ -73,7 +71,7 @@ async def set_leds():
             elif sensor.dry:
                 LED_GRN.on()
             else:
-                LED_GRN.value(is_morning())
+                LED_GRN.value(tu.is_morning())
 
         await asyncio.sleep(1)
 
@@ -86,13 +84,8 @@ def startup_blink():
         time.sleep(0.2)
 
 
-async def queue_restart():
-    delay = 60 * (60 - get_time()[1])
-    asyncio.sleep(900)
-    machine.reset()
 
-
-async def task_loop():
+async def main():
     loop = asyncio.get_event_loop()
     asyncio.create_task(server.run_server())
     asyncio.create_task(set_leds())
@@ -100,6 +93,8 @@ async def task_loop():
     asyncio.create_task(hourly_data_collection())
     asyncio.create_task(keep_connection())
     loop.run_forever()
+    await asyncio.sleep(tu.seconds_until_time(8))
+
 
 
 if __name__ == "__main__":
@@ -110,13 +105,14 @@ if __name__ == "__main__":
     valve = WaterValve(PIN_VALVE)
 
     wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
-    set_rtc()
+    tu = TimeUtils()
+    ws = WeatherApi()
     server = DataServer(wifi.ip)
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
     try:
         startup_blink()
-        asyncio.run(task_loop())
+        asyncio.run(main())
     finally:
         asyncio.new_event_loop()
         LED_ONBOARD.off()
