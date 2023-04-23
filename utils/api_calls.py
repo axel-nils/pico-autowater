@@ -14,6 +14,7 @@ class WeatherApi:
         r.close()
 
     def get(self) -> str:
+        """Gives string with temperature and description of current weather"""
         r = requests.get(self.weather_url, headers=WeatherApi.headers)
         data = r.json()["properties"]["timeseries"][0]["data"]
         r.close()

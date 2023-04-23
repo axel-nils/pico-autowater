@@ -27,9 +27,9 @@ class DataServer:
         return pages
 
     async def run_server(self):
-        await asyncio.start_server(self.serve, self.host, self.port)
+        await asyncio.start_server(self.serve_client, self.host, self.port)
 
-    async def serve(self, reader, writer):
+    async def serve_client(self, reader, writer):
         try:
             request_line = await reader.readline()
             while await reader.readline() != b"\r\n":
