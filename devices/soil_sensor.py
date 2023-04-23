@@ -11,7 +11,7 @@ class SoilSensor:
     """
     Contains temp and moisure values pulled from sensor using I2C
     """
-    
+
     MS_ADDR = 0x36
     MS_TEMP_BASE = 0x00
     MS_TEMP_OFFSET = 0x04
@@ -52,7 +52,8 @@ class SoilSensor:
         """
         Updates and returns the measured temperature
         """
-        buf = bytearray(self.read_sensor(self.MS_TEMP_BASE, self.MS_TEMP_OFFSET, 4))
+        buf = bytearray(self.read_sensor(
+            self.MS_TEMP_BASE, self.MS_TEMP_OFFSET, 4))
         buf[0] = buf[0] & 0x3F
         temp = int(0.00001525878 * struct.unpack(">I", buf)[0])
         self.temp = temp
@@ -69,7 +70,8 @@ class SoilSensor:
         self.moisture_series.append(self.raw_moisture)
 
         mean = sum(self.moisture_series) // len(self.moisture_series)
-        self.moisture = int(100 * (mean - self.min_moisture) / (self.max_moisture - self.min_moisture))
+        self.moisture = int(100 * (mean - self.min_moisture) /
+                            (self.max_moisture - self.min_moisture))
 
     def update(self):
         """'

@@ -57,7 +57,8 @@ async def log_data():
         delay = 60 * (60 - tu.minute)
         await asyncio.sleep(delay)
         datetime = tu.datetime_str()
-        entry = data.Entry(datetime, sensor.moisture, sensor.temp, valve.is_open)
+        entry = data.Entry(datetime, sensor.moisture,
+                           sensor.temp, valve.is_open)
         data.append_entry(entry)
         with open(DATA_FILE, "r") as file:
             server.pages["json"] = str(file.read())
@@ -89,7 +90,8 @@ async def main():
 if __name__ == "__main__":
     c = Config(CONFIG_FILE)
     data = DataFile(DATA_FILE)
-    sensor = SoilSensor(PIN_SCL, PIN_SDA, c.dry_level, c.wet_level, c.min_moisture, c.max_moisture)
+    sensor = SoilSensor(PIN_SCL, PIN_SDA, c.dry_level,
+                        c.wet_level, c.min_moisture, c.max_moisture)
     valve = WaterValve(PIN_VALVE)
     wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
     tu = TimeUtils()

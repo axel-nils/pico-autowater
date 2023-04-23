@@ -19,7 +19,8 @@ class Config:
                     if key in json_object:
                         self._configs[key] = json_object[key]
         except:
-            print(f"Failed reading \"{path}\", please enter desired values in generated file")
+            print(
+                f"Failed reading \"{path}\", please enter desired values in generated file")
             self.save()
 
     def update(self, key, value):

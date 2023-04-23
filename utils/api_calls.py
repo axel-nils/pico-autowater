@@ -5,7 +5,8 @@ import time
 
 class WeatherApi:
     icons_url = "https://api.met.no/weatherapi/weathericon/2.0/legends"
-    headers = {"User-Agent": "pico-autowater https://github.com/axel-nils/pico-autowater"}
+    headers = {
+        "User-Agent": "pico-autowater https://github.com/axel-nils/pico-autowater"}
 
     def __init__(self):
         self.weather_url = f"https://api.met.no/weatherapi/nowcast/2.0/complete?lat=57.4&lon=12.0"
@@ -20,7 +21,7 @@ class WeatherApi:
         r.close()
         temp = int(data["instant"]["details"]["air_temperature"])
         code = data["next_1_hours"]["summary"]["symbol_code"]
-        desc = self.descriptions[code.split("_")[0]]["desc_nb"].lower()  # "desc_en" for english
+        desc = self.descriptions[code.split("_")[0]]["desc_nb"].lower()
         return f"Utomhus är det {temp} °C och {desc}."
 
 
@@ -59,4 +60,3 @@ class TimeUtils:
     def seconds_until_time(hour: int, minute=0, second=0) -> int:
         dtt = time.localtime()
         return (3600 * hour + 60 * minute + second - (3600 * dtt[3] + 60 * dtt[4] + dtt[5])) % 86400
-

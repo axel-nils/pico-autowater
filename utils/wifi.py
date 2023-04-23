@@ -22,8 +22,9 @@ class WiFi:
 
     def attempt_connection(self):
         if self.ip:
-            self.wlan.ifconfig((self.ip, '255.255.255.0', '192.168.1.1', '192.168.1.1'))
-        
+            self.wlan.ifconfig(
+                (self.ip, '255.255.255.0', '192.168.1.1', '192.168.1.1'))
+
         if not self.wlan.isconnected():
             self.wlan.connect(self.ssid, self.psw)
             while not self.wlan.isconnected():
