@@ -2,29 +2,6 @@ import urequests as requests
 from machine import RTC
 import time
 
-
-class WeatherApi:
-    icons_url = "https://api.met.no/weatherapi/weathericon/2.0/legends"
-    headers = {
-        "User-Agent": "pico-autowater https://github.com/axel-nils/pico-autowater"}
-
-    def __init__(self):
-        self.weather_url = f"https://api.met.no/weatherapi/nowcast/2.0/complete?lat=57.4&lon=12.0"
-        r = requests.get(WeatherApi.icons_url, headers=WeatherApi.headers)
-        self.descriptions = r.json()
-        r.close()
-
-    def get(self) -> str:
-        """Gives string with temperature and description of current weather"""
-        r = requests.get(self.weather_url, headers=WeatherApi.headers)
-        data = r.json()["properties"]["timeseries"][0]["data"]
-        r.close()
-        temp = int(data["instant"]["details"]["air_temperature"])
-        code = data["next_1_hours"]["summary"]["symbol_code"]
-        desc = self.descriptions[code.split("_")[0]]["desc_nb"].lower()
-        return f"Utomhus är det {temp} °C och {desc}."
-
-
 class TimeUtils:
     time_url = "https://www.timeapi.io/api/Time/current/zone?timeZone=Europe/Stockholm"
 

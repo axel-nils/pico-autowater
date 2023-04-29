@@ -9,7 +9,7 @@ from machine import I2C, Pin
 
 class SoilSensor:
     """
-    Contains temp and moisure values pulled from sensor using I2C
+    Contains temp and moisture values pulled from sensor using I2C
     """
 
     MS_ADDR = 0x36
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     """
     Run this. Set min and max moisture constants to match totally dry and wet soil.
     """
-    from pin_config import PIN_SCL, PIN_SDA
+    from devices.pin_config import PIN_SCL, PIN_SDA
     i2c = I2C(0, scl=PIN_SCL, sda=PIN_SDA)
 
     devices = i2c.scan()

@@ -10,6 +10,24 @@ const dryLevel = getIntFromElementId("dry_string", 50)
 const isDry = (ctx, value) => ctx.p0.parsed.y < dryLevel && ctx.p1.parsed.y < dryLevel ? value : undefined;
 const isWet = (ctx, value) => ctx.p0.parsed.y > wetLevel && ctx.p1.parsed.y > wetLevel ? value : undefined;
 
+window.onload = (event) => {
+  getWeatherJson(weatherUrl)
+};
+
+const weatherUrl = "https://api.met.no/weatherapi/nowcast/2.0/complete?lat=57.4&lon=12.0"
+const legendUrl = "https://api.met.no/weatherapi/weathericon/2.0/legends"
+
+async function getWeatherJson() {
+  const weatherRespone = await fetch(weatherUrl);
+  const weatherJSON = await weatherRespone.json();
+  const weatherData = weatherJSON.properties.timeseries[0].data;
+  const temperature = parseInt(weatherData.instant.details.air_temperature);
+  const weatherCode = weatherData.next_1_hours.summary.symbol_code;
+  const legendResponse = await fetch(legendUrl);
+  const legendJSON = await legendResponse.json();
+  const description = legendJSON[weatherCode.split("_")[0]].desc_nb.toLowerCase();
+  document.getElementById("weather").innerHTML = "Utomhus är det " + temperature + "°C och " + description + ".";
+}
 
 function getIntFromElementId(id, def) {
   const maybeInt = parseInt(document.getElementById(id).textContent);

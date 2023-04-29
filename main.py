@@ -7,7 +7,36 @@ from utils import *
 DATA_FILE = "data.json"
 CONFIG_FILE = "config.json"
 
-replacements = dict()
+
+class SystemStatus:
+    def __init__(self):
+        self.datetime = tu.datetime_str()[11:]
+        self.moisture = sensor.moisture
+        self.temperature = sensor.temp
+        self.valve_open = valve.is_open
+        self.water_setting = server.water_setting
+        self.dry_threshold = c.dry_level
+        self.wet_threshold = c.wet_level
+        self._website_data = dict()
+
+    def update(self):
+        self.datetime = tu.datetime_str()[11:]
+        sensor.update()
+        self.moisture = sensor.moisture
+        self.temperature = sensor.temp
+        self.valve_open = valve.is_open
+        self.water_setting = server.water_setting
+
+    @property
+    def website_dict(self):
+        self._website_data["{temperature}"] = self.temperature
+        self._website_data["{moisture}"] = self.moisture
+        self._website_data["{valve_open}"] = "öppen" if self.valve_open else "stängd"
+        self._website_data["{water_setting}"] = WaterSettings.to_str(self.water_setting)
+        self._website_data["{datetime}"] = self.datetime
+        self._website_data["{dry_threshold}"] = self.dry_threshold
+        self._website_data["{wet_threshold}"] = self.wet_threshold
+        return self._website_data
 
 
 def startup_blink():
@@ -20,35 +49,27 @@ def startup_blink():
 
 async def gather_values():
     while True:
-        sensor.update()
-        replacements["{temperature}"] = sensor.temp
-        replacements["{moisture}"] = sensor.moisture
-        replacements["{water_on}"] = valve.is_open
-        replacements["{datetime}"] = tu.datetime_str()[11:]
-        replacements["{dry_threshold}"] = c.dry_level
-        replacements["{wet_threshold}"] = c.wet_level
-        server.system_status = replacements
+        system.update()
+        server.system_status = system.website_dict
         await asyncio.sleep(10)
 
 
 async def handle_io():
     while True:
-        if server.water_on:
-            LED_GRN.on()
-            server.water_on = False
-        elif server.water_off:
-            LED_GRN.off()
-            server.water_off = False
-        else:
+        if server.water_setting == WaterSettings.auto:
             if sensor.wet:
-                LED_GRN.off()
+                valve.close()
             elif sensor.dry:
-                LED_GRN.on()
+                valve.open()
             else:
-                LED_GRN.value(tu.is_morning())
+                valve.open() if tu.is_morning() else valve.close()
+        elif server.water_setting == WaterSettings.on:
+            valve.open()
+        elif server.water_setting == WaterSettings.off:
+            valve.close()
 
         LED_RED.value(sensor.dry)
-        valve.open() if LED_GRN.value() else valve.close()
+        LED_GRN.value(valve.is_open)
         await asyncio.sleep(1)
 
 
@@ -63,13 +84,15 @@ async def log_data():
         with open(DATA_FILE, "r") as file:
             server.pages["json"] = str(file.read())
         gc.collect()
+        print("Data logged at ", datetime)
 
 
 async def keep_connection():
     while True:
-        if not wifi.test_connection():
+        if wifi.test_connection():
+            print("WiFi ok")
+        else:
             wifi.attempt_connection()
-        replacements["{weather}"] = WeatherApi().get()
         await asyncio.sleep(600)
 
 
@@ -81,7 +104,9 @@ async def main():
     asyncio.create_task(server.run_server())
     asyncio.create_task(keep_connection())
     while True:
-        await asyncio.sleep(tu.seconds_until_time(8, 30))
+        delay = tu.seconds_until_time(8, 30)
+        print("Restarting in ", tu.seconds_until_time(8, 30))
+        await asyncio.sleep(delay)
         LED_ONBOARD.off()
         from machine import WDT
         WDT(timeout=0)
@@ -95,8 +120,9 @@ if __name__ == "__main__":
     valve = WaterValve(PIN_VALVE)
     wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
     tu = TimeUtils()
-    ws = WeatherApi()
     server = DataServer(wifi.ip)
+    system = SystemStatus()
+
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
     try:

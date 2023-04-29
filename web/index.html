@@ -43,12 +43,14 @@
           <span id="dry_string" class="kwarg">{dry_threshold}</span>%.
         </p>
         <p>
-          Bevattningen är för närvarande <span class="kwarg">{water_on}</span>.
-          Om du slår på den manuellt kommer den vara på tills fuktigheten är över den övre gränsen.
+          Bevattningen är för närvarande inställd på <span class="kwarg">{water_setting}</span>
+          och ventilen är <span class="kwarg">{valve_open}</span>.
+          Om du slår på den manuellt kommer den vara på tills den slås av manuellt eller ställs om till auto.
         </p>
         <form class="wrapper">
-          <button id="on_btn" class="green" type="submit" formmethod="post" formaction="./water_on"> ON </button>
-          <button id="off_btn" class="red" type="submit" formmethod="post" formaction="./water_off"> OFF </button>
+          <button id="auto_btn" class="green" type="submit" formmethod="post" formaction="./water=auto"> AUTO </button>
+          <button id="on_btn" class="green" type="submit" formmethod="post" formaction="./water=on"> ON </button>
+          <button id="off_btn" class="red" type="submit" formmethod="post" formaction="./water=off"> OFF </button>
         </form>
       </div>
     </div>

@@ -1,6 +1,21 @@
 import uasyncio as asyncio
 
 
+class WaterSettings(enumerate):
+    auto = -1
+    off = 0
+    on = 1
+
+    @staticmethod
+    def to_str(setting):
+        if setting == WaterSettings.auto:
+            return "auto"
+        elif setting == WaterSettings.on:
+            return "on"
+        elif setting == WaterSettings.off:
+            return "off"
+
+
 class DataServer:
     def __init__(self, ip):
         self.ip = ip
@@ -12,8 +27,7 @@ class DataServer:
                       "png": "web/icon.png"}
         self.pages = self.preload_pages()
         self.system_status = dict()
-        self.water_on = False
-        self.water_off = False
+        self.water_setting = WaterSettings.auto
 
     def preload_pages(self) -> dict:
         pages = {}
@@ -53,7 +67,7 @@ class DataServer:
         print("Server got request:", request)
 
         html_requests = ["/", "//", "/index.html"]
-        posts = ["/water_on", "/water_off"]
+        posts = ["/water=auto", "/water=on", "/water=off"]
 
         if request in html_requests:
             header = self.ok_header("text/html", 60)
@@ -77,9 +91,12 @@ class DataServer:
             header = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
             response = self.pages["error"]
 
-        if "/water_on" in request:
-            self.water_on = True
-            self.water_off = False
+        if "/water=auto" in request:
+            self.water_setting = WaterSettings.auto
+        elif "/water=on" in request:
+            self.water_setting = WaterSettings.on
+        elif "/water=off" in request:
+            self.water_setting = WaterSettings.off
 
         return header, response
 

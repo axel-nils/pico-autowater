@@ -2,6 +2,8 @@ import network
 import urequests as requests
 import time
 
+from lib import uping
+
 
 class WiFi:
 
@@ -37,10 +39,10 @@ class WiFi:
         """Returns true if able to connect to url on the internet"""
         if not self.wlan.isconnected():
             return False
-        url = "https://httpbin.org/ip"
         try:
-            r = requests.get(url)
-            r.close()
+            sent, received = uping.ping("192.168.1.1", quiet=True)
+            if sent != received:
+                raise OSError("ping error")
         except OSError as e:
             print(e)
             return False
