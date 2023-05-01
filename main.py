@@ -107,9 +107,15 @@ async def main():
         delay = tu.seconds_until_time(8, 30)
         print("Restarting in ", tu.seconds_until_time(8, 30))
         await asyncio.sleep(delay)
-        LED_ONBOARD.off()
-        from machine import WDT
-        WDT(timeout=0)
+        shutdown()
+
+
+def shutdown():
+    from machine import WDT
+    LED_ONBOARD.off()
+    LED_RED.off()
+    LED_GRN.off()
+    WDT(timeout=0)
 
 
 if __name__ == "__main__":
@@ -128,4 +134,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     finally:
-        LED_ONBOARD.off()
+        shutdown()

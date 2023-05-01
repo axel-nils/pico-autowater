@@ -66,7 +66,7 @@ class DataServer:
 
         print("Server got request:", request)
 
-        html_requests = ["/", "//", "/index.html"]
+        html_requests = ["/", "/index.html"]
         posts = ["/water=auto", "/water=on", "/water=off"]
 
         if request in html_requests:
@@ -74,6 +74,9 @@ class DataServer:
             response = self.create_html_response()
         elif request in posts:
             header = "HTTP/1.1 204 No content\r\n\r\n"
+            response = ""
+        elif "//" in request:
+            header = "HTTP/1.1 301 Moved Permanently\r\nLocation: /\r\n\r\n"
             response = ""
         elif "style.css" in request:
             header = self.ok_header("text/css", 86400)
