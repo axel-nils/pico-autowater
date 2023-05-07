@@ -91,6 +91,8 @@ async function drawMainChart() {
 
   const opt = {
     responsive: true,
+    maintainAspectRatio: false,
+    resizeDelay: 5,
     scales: {
       x: { // TODO properly implement dates https://www.chartjs.org/docs/latest/samples/scales/time-line.html
         ticks: {
@@ -192,7 +194,8 @@ function drawGaugeChart() {
 
   const opt = {
     responsive: true,
-    aspectRatio: 1.5,
+    maintainAspectRatio: false,
+    resizeDelay: 5,
     plugins: {
       tooltips: {
         enabled: false
