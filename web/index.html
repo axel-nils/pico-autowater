@@ -12,50 +12,71 @@
   </head>
 
   <body>
+    <div class="top_corner"></div>
     <header>Nilssons Växthus</header>
+    <div class="top_corner"></div>
     <div class="main">
-      <h1>Status</h1>
-      <p>
-        Vid senaste mätningen (<span class="kwarg">{datetime}</span>)
-        var jordfuktigheten <span id="moisture_string" class="kwarg">{moisture}</span>%
-        och lufttemperaturen <span class="kwarg">{temperature}</span> &deg;C i växthuset.
-        <span id="weather" class="kwarg">{weather}</span>
-      </p>
       <h1>Historik</h1>
       <script src="app.js" defer></script>
-      <div class="chart-container" style="position: relative; height: 60vh">
+      <div class="chart_container">
         <canvas id="mainCanvas"></canvas>
       </div>
-      <a class="wrapper" href="/data.json" style="text-decoration: none" download>
-        <button id="download_btn" class="green" type="submit"> Ladda ner data </button>
+      <a href="/data.json" style="text-decoration: none" download>
+        <button id="download_btn" type="submit" style="margin: 1em">Ladda ner insamlad data</button>
       </a>
-
     </div>
     <div class="side">
-      <h1>Bevattning</h1>
-      <div>
+      <h1>Status</h1>
+      <div style="padding: 0 10%">
         <canvas id="gaugeCanvas"></canvas>
       </div>
-      <div>
-        <p>
-          Automatisk bevattning går igång på morgonen om fuktigheten är under
-          <span id="wet_string" class="kwarg">{wet_threshold}</span>% eller när som helst om fuktigheten är under
-          <span id="dry_string" class="kwarg">{dry_threshold}</span>%.
-        </p>
-        <p>
-          Bevattningen är för närvarande inställd på <span class="kwarg">{water_setting}</span>
-          och ventilen är <span class="kwarg">{valve_open}</span>.
-          Om du slår på den manuellt kommer den vara på tills den slås av manuellt eller ställs om till auto.
-        </p>
-        <form class="wrapper">
-          <button id="auto_btn" class="green" type="submit" formmethod="post" formaction="./water=auto"> AUTO </button>
-          <button id="on_btn" class="green" type="submit" formmethod="post" formaction="./water=on"> ON </button>
-          <button id="off_btn" class="red" type="submit" formmethod="post" formaction="./water=off"> OFF </button>
-        </form>
-      </div>
+      <table>
+        <colgroup>
+          <col>
+          <col>
+        </colgroup>
+        <tr>
+          <td>Tid</td>
+          <td>{datetime}</td>
+        </tr>
+        <tr>
+          <td>Lufttemperatur [&deg;C]</td>
+          <td>{temperature}</td>
+        </tr>
+        <tr>
+          <td>Fuktighet [%]</td>
+          <td id="moisture_string">{moisture}</td>
+        </tr>
+        <tr>
+          <td>Gräns för torka [%]</td>
+          <td id="dry_string">{dry_threshold}</td>
+        </tr>
+        <tr>
+          <td>Gräns för fuktighet [%]</td>
+          <td id="wet_string">{wet_threshold}</td>
+        </tr>
+        <tr>
+          <td>Bevattning</td>
+          <td>{water_setting}</td>
+        </tr>
+        <tr>
+          <td>Ventil</td>
+          <td>{valve_open}</td>
+        </tr>
+      </table>
+      <p id="weather">Utomhusväder</p>
+      <h1>Bevattningsinställning</h1>
+      <form>
+        <button id="auto_btn" type="submit" formmethod="post" formaction="./water=auto"> Auto </button>
+        <button id="on_btn" type="submit" formmethod="post" formaction="./water=on"> På </button>
+        <button id="off_btn"  type="submit" formmethod="post" formaction="./water=off"> Av </button>
+      </form>
     </div>
     <footer>
-      <a href="https://github.com/axel-nils/pico-autowater">GitHub Repository</a>
+      <p>
+        Källkod och mer information:
+        <a href="https://github.com/axel-nils/pico-autowater">GitHub repo</a>
+      </p>
     </footer>
   </body>
 

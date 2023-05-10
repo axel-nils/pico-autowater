@@ -18,8 +18,8 @@ const weatherUrl = "https://api.met.no/weatherapi/nowcast/2.0/complete?lat=57.4&
 const legendUrl = "https://api.met.no/weatherapi/weathericon/2.0/legends"
 
 async function getWeatherJson() {
-  const weatherRespone = await fetch(weatherUrl);
-  const weatherJSON = await weatherRespone.json();
+  const weatherResponse = await fetch(weatherUrl);
+  const weatherJSON = await weatherResponse.json();
   const weatherData = weatherJSON.properties.timeseries[0].data;
   const temperature = parseInt(weatherData.instant.details.air_temperature);
   const weatherCode = weatherData.next_1_hours.summary.symbol_code;
@@ -197,13 +197,13 @@ function drawGaugeChart() {
     maintainAspectRatio: false,
     resizeDelay: 5,
     plugins: {
-      tooltips: {
-        enabled: false
-      },
       title: {
         display: true,
         text: x.toString() + "%",
         position: "bottom"
+      },
+      tooltip: {
+        enabled: false
       }
     }
   }
