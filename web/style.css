@@ -112,7 +112,7 @@ body {
   body {
     --fs-body: 1.25rem;
     --fs-heading: 2rem;
-    grid-template-columns: minmax(0, 1fr) minmax(400px, 1000px) minmax(250px, 400px) minmax(0, 1fr);
+    grid-template-columns: minmax(1em, 1fr) minmax(400px, 1000px) minmax(250px, 400px) minmax(1em, 1fr);
     grid-template-areas:
       ". header header ."
       ". main side ."

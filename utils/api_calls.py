@@ -2,10 +2,12 @@ import urequests as requests
 from machine import RTC
 import time
 
+
 class TimeUtils:
     time_url = "https://www.timeapi.io/api/Time/current/zone?timeZone=Europe/Stockholm"
 
-    def __init__(self):
+    @staticmethod
+    def set_rtc():
         rtc = RTC()
         r = requests.get(TimeUtils.time_url)
         dt = r.json()
@@ -14,8 +16,8 @@ class TimeUtils:
         rtc.datetime(dtt)
         print("RTC set to", TimeUtils.datetime_str())
 
-    @property
-    def minute(self):
+    @staticmethod
+    def minute():
         return time.localtime()[4]
 
     @staticmethod

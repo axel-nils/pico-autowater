@@ -15,6 +15,7 @@ class WiFi:
         self.ssid = ssid
         self.psw = psw
         self.ip = ip
+        network.country("SE")  # To comply with swedish redio regulations
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=0xa11140)  # Disable power saver-mode

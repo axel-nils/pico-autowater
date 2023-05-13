@@ -7,10 +7,11 @@ from collections import namedtuple
 
 
 class DataFile:
+    _fields = ["datetime", "moisture", "temperature", "watering"]
     Entry = namedtuple(
-        "Entry", ["datetime", "moisture", "temperature", "watering"])
+        "Entry", _fields)
     template_json = {
-        "data_columns": ["datetime", "moisture", "temperature", "watering"],
+        "data_columns": _fields,
         "data": []
     }
 
@@ -21,7 +22,7 @@ class DataFile:
 
     def save_json(self) -> None:
         with open(self.filename, "w") as f:
-            json.dump(self.json, f, separators=(',', ':'))
+            json.dump(self.json, f, separators=(", ", ": "))
 
     def get_json(self) -> dict:
         try:
@@ -48,14 +49,17 @@ if __name__ == "__main__":
     Example usage
     """
     import random
-    datafile = DataFile("../data/test2_data.json")
-    print(datafile.data())
+    datafile = DataFile("data.json")
+    print(datafile.data)
+    
     m = 50
     t = 18
     for i in range(10, 23):
-        dt_str = "2023-03-07T" + str(i) + ":41:43.0191136"
+        dt_str = "2023-03-07T" + str(i) + ":00"
         m += random.randint(-10, 10)
         t += random.randint(-2, 2)
-        e = datafile.Entry(dt_str, m, t)
+        w = True if i % 2 == 0 else False
+        e = datafile.Entry(dt_str, m, t, w)
         print([value for value in e])
         datafile.append_entry(e)
+

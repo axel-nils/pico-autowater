@@ -29,7 +29,7 @@ class Config:
 
     def save(self):
         with open(self.path, "w") as f:
-            json.dump(self._configs, f, indent=2)
+            json.dump(self._configs, f, separators=("\n", ": "))
 
     @property
     def max_moisture(self) -> str:

@@ -1,8 +1,11 @@
+import time
+
 import uasyncio as asyncio
 import gc
+from machine import WDT
 
-from devices import *
-from utils import *
+from devices import SoilSensor, WaterValve, PIN_SCL, PIN_SDA, PIN_VALVE, LED_ONBOARD, LED_RED, LED_GRN
+from utils import TimeUtils, WaterSettings, Config, DataFile, WiFi, DataServer
 
 DATA_FILE = "data.json"
 CONFIG_FILE = "config.json"
@@ -10,7 +13,7 @@ CONFIG_FILE = "config.json"
 
 class SystemStatus:
     def __init__(self):
-        self.datetime = tu.datetime_str()[11:]
+        self.datetime = TimeUtils.datetime_str()[11:]
         self.moisture = sensor.moisture
         self.temperature = sensor.temp
         self.valve_open = valve.is_open
@@ -20,7 +23,7 @@ class SystemStatus:
         self._website_data = dict()
 
     def update(self):
-        self.datetime = tu.datetime_str()[11:]
+        self.datetime = TimeUtils.datetime_str()[11:]
         sensor.update()
         self.moisture = sensor.moisture
         self.temperature = sensor.temp
@@ -62,7 +65,7 @@ async def handle_io():
             elif sensor.dry:
                 valve.open()
             else:
-                valve.open() if tu.is_morning() else valve.close()
+                valve.open() if TimeUtils.is_morning() else valve.close()
         elif server.water_setting == WaterSettings.on:
             valve.open()
         elif server.water_setting == WaterSettings.off:
@@ -75,9 +78,9 @@ async def handle_io():
 
 async def log_data():
     while True:
-        delay = 60 * (60 - tu.minute)
+        delay = 60 * (60 - TimeUtils.minute())
         await asyncio.sleep(delay)
-        datetime = tu.datetime_str()
+        datetime = TimeUtils.datetime_str()
         entry = data.Entry(datetime, sensor.moisture,
                            sensor.temp, valve.is_open)
         data.append_entry(entry)
@@ -98,20 +101,20 @@ async def keep_connection():
 
 async def main():
     startup_blink()
-    asyncio.create_task(gather_values())
     asyncio.create_task(handle_io())
     asyncio.create_task(log_data())
+    asyncio.create_task(gather_values())
     asyncio.create_task(server.run_server())
     asyncio.create_task(keep_connection())
+
     while True:
-        delay = tu.seconds_until_time(8, 30)
-        print("Restarting in ", tu.seconds_until_time(8, 30))
+        delay = TimeUtils.seconds_until_time(8, 30) % 43200  # 8:30 AM as well as PM
+        print(f"Restarting in {delay}")
         await asyncio.sleep(delay)
         shutdown()
 
 
 def shutdown():
-    from machine import WDT
     LED_ONBOARD.off()
     LED_RED.off()
     LED_GRN.off()
@@ -125,7 +128,7 @@ if __name__ == "__main__":
                         c.wet_level, c.min_moisture, c.max_moisture)
     valve = WaterValve(PIN_VALVE)
     wifi = WiFi(c.wifi_name, c.wifi_pass, c.static_ip)
-    tu = TimeUtils()
+    TimeUtils.set_rtc()
     server = DataServer(wifi.ip)
     system = SystemStatus()
 
